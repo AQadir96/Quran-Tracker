@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Make Your Quran Tracker APK — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green:#1a9e5c; --green-light:#e8f8f0;
+    --gold:#b8860a; --gold-light:#fff8e8;
+    --blue:#1a6fb5; --blue-light:#e8f2fc;
+    --purple:#6d28d9; --purple-light:#ede9fe;
+    --red:#c0392b; --red-light:#fdf0ef;
+    --orange:#d97706; --orange-light:#fef3c7;
+    --bg:#f7f8fa; --white:#fff;
+    --text:#1a1f2e; --muted:#6b7280; --border:#e2e8f0;
+    --shadow:0 2px 16px rgba(0,0,0,0.09);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;}
+
+  /* COVER */
+  .cover{background:linear-gradient(135deg,#0f4c2a 0%,#1a7a45 60%,#0d3d22 100%);color:#fff;padding:56px 32px 48px;text-align:center;position:relative;overflow:hidden;}
+  .cover::after{content:'📱';font-size:160px;position:absolute;right:-30px;top:-20px;opacity:.07;pointer-events:none;}
+  .cover-pill{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:5px 18px;font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:20px;}
+  .cover h1{font-size:34px;font-weight:900;line-height:1.2;margin-bottom:14px;}
+  .cover p{font-size:16px;opacity:.85;max-width:500px;margin:0 auto;}
+  .phases-row{display:flex;justify-content:center;gap:0;margin-top:36px;flex-wrap:wrap;}
+  .phase-pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:12px 22px;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:130px;}
+  .phase-pill:first-child{border-radius:12px 0 0 12px;}
+  .phase-pill:last-child{border-radius:0 12px 12px 0;}
+  .phase-pill .arrow{font-size:18px;}
+  .phase-pill .num{font-size:22px;font-weight:900;}
+  .phase-pill .lbl{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;}
+
+  /* LAYOUT */
+  .container{max-width:860px;margin:0 auto;padding:40px 24px 80px;}
+
+  /* FILES BOX */
+  .files-box{background:var(--white);border-radius:16px;border:2px dashed var(--green);padding:28px 32px;margin-bottom:36px;box-shadow:var(--shadow);}
+  .files-box h2{font-size:18px;font-weight:900;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .file-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .file-row:last-child{border-bottom:none;}
+  .file-icon{font-size:24px;flex-shrink:0;}
+  .file-name{font-family:'Fira Code',monospace;font-size:14px;font-weight:600;color:var(--blue);}
+  .file-desc{font-size:13px;color:var(--muted);}
+  .file-badge{margin-left:auto;background:var(--green-light);color:var(--green);font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;}
+
+  /* PHASE HEADER */
+  .phase-header{display:flex;align-items:center;gap:16px;margin:48px 0 24px;padding-bottom:16px;border-bottom:3px solid var(--border);}
+  .phase-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;}
+  .ph-green{background:var(--green);}
+  .ph-blue{background:var(--blue);}
+  .ph-purple{background:var(--purple);}
+  .phase-header h2{font-size:22px;font-weight:900;}
+  .phase-header p{font-size:14px;color:var(--muted);}
+
+  /* STEP */
+  .step{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:24px 28px;margin-bottom:14px;box-shadow:var(--shadow);position:relative;}
+  .step-badge{position:absolute;top:-12px;left:24px;border-radius:99px;padding:3px 14px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+  .sb-green{background:var(--green);color:#fff;}
+  .sb-blue{background:var(--blue);color:#fff;}
+  .sb-purple{background:var(--purple);color:#fff;}
+  .step h3{font-size:17px;font-weight:800;margin:8px 0 12px;}
+  .step p,.step li{font-size:15px;color:#374151;margin-bottom:8px;}
+  .step ul,.step ol{padding-left:22px;}
+  .step li{margin-bottom:8px;}
+
+  /* CALLOUTS */
+  .callout{border-radius:10px;padding:13px 17px;margin:14px 0;font-size:14px;display:flex;gap:10px;align-items:flex-start;}
+  .callout .icon{font-size:19px;flex-shrink:0;margin-top:1px;}
+  .tip{background:var(--green-light);border-left:4px solid var(--green);}
+  .warn{background:var(--gold-light);border-left:4px solid var(--gold);}
+  .info{background:var(--blue-light);border-left:4px solid var(--blue);}
+  .danger{background:var(--red-light);border-left:4px solid var(--red);}
+  .important{background:var(--purple-light);border-left:4px solid var(--purple);}
+
+  /* CODE / TERMINAL */
+  .terminal{background:#1e1e2e;border-radius:10px;padding:16px 18px;margin:12px 0;font-family:'Fira Code',monospace;font-size:13px;color:#cdd6f4;position:relative;}
+  .terminal::before{content:'⬤ ⬤ ⬤';display:block;color:#45475a;font-size:10px;letter-spacing:3px;margin-bottom:10px;font-family:sans-serif;}
+  .t-green{color:#a6e3a1;} .t-blue{color:#89b4fa;} .t-yellow{color:#f9e2af;} .t-red{color:#f38ba8;} .t-muted{color:#585b70;}
+
+  /* URL BAR */
+  .url{background:#f1f5f9;border:2px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Fira Code',monospace;font-size:14px;color:var(--blue);margin:10px 0;display:flex;align-items:center;gap:8px;}
+  .url::before{content:'🔒';font-size:14px;}
+
+  /* BUTTONS (visual mockups) */
+  .btn-mock{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:8px;font-weight:800;font-size:14px;margin:4px 2px;}
+  .btn-green{background:#1a9e5c;color:#fff;}
+  .btn-grey{background:#4b5563;color:#fff;}
+  .btn-blue{background:#1a6fb5;color:#fff;}
+  .btn-purple{background:#6d28d9;color:#fff;}
+  .btn-outline{background:#fff;color:#374151;border:2px solid #d1d5db;}
+
+  /* INPUT MOCK */
+  .inp{display:inline-block;background:#fff;border:2px solid #94a3b8;border-radius:6px;padding:7px 12px;font-size:14px;color:#374151;margin:4px 0;}
+  .inp.typed{border-color:var(--blue);color:var(--blue);font-family:'Fira Code',monospace;}
+
+  /* FOLDER STRUCTURE */
+  .folder{background:#1e1e2e;border-radius:10px;padding:16px 20px;font-family:'Fira Code',monospace;font-size:13px;color:#cdd6f4;margin:12px 0;}
+  .folder .dir{color:#89b4fa;}
+  .folder .file{color:#a6e3a1;}
+  .folder .imp{color:#f9e2af;font-weight:700;}
+
+  /* SEPARATOR */
+  hr{border:none;height:1px;background:var(--border);margin:40px 0;}
+
+  /* PROGRESS TRACKER */
+  .progress-tracker{display:flex;gap:0;margin:32px 0;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+  .pt-step{flex:1;padding:14px 10px;text-align:center;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;border-right:1px solid var(--border);}
+  .pt-step:last-child{border-right:none;}
+  .pt-step .icon{font-size:20px;}
+  .pt-step.done{background:var(--green-light);color:var(--green);}
+  .pt-step.active{background:var(--blue);color:#fff;}
+  .pt-step.todo{background:#fff;color:var(--muted);}
+
+  /* CHECKLIST */
+  .checklist{list-style:none;padding:0;}
+  .checklist li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:15px;}
+  .checklist li:last-child{border-bottom:none;}
+  .ck{color:var(--green);font-size:18px;flex-shrink:0;}
+
+  /* FINAL */
+  .final{background:linear-gradient(135deg,#0f4c2a,#1a7a45);color:#fff;border-radius:20px;padding:44px 36px;text-align:center;margin-top:48px;}
+  .final h2{font-size:28px;font-weight:900;margin-bottom:12px;}
+  .final p{opacity:.85;font-size:16px;max-width:480px;margin:0 auto 20px;}
+
+  /* WHATSAPP */
+  .wa-wrap{background:#075E54;border-radius:16px;padding:20px;max-width:400px;margin:0 auto;}
+  .wa-bubble{background:#DCF8C6;color:#111;border-radius:12px 12px 12px 2px;padding:14px 16px;font-size:14px;line-height:1.6;text-align:left;margin-top:10px;}
+
+  @media(max-width:620px){
+    .cover h1{font-size:24px;}
+    .phases-row{gap:4px;}
+    .phase-pill{min-width:90px;padding:10px 12px;}
+    .phase-pill:first-child,.phase-pill:last-child{border-radius:10px;}
+    .container{padding:24px 14px 60px;}
+    .step{padding:20px 16px;}
+    .progress-tracker{flex-direction:column;}
+    .pt-step{border-right:none;border-bottom:1px solid var(--border);flex-direction:row;justify-content:flex-start;text-align:left;}
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-pill">📱 Complete APK Guide — Level 0</div>
+  <h1>Get Your Quran Tracker<br/>APK on Every Phone</h1>
+  <p>Two phases: put your app online with GitHub, then download the APK from PWABuilder. Share via WhatsApp!</p>
+  <div class="phases-row">
+    <div class="phase-pill"><div class="num">⬆️</div><div class="lbl">Phase 1</div><div>Upload to GitHub</div></div>
+    <div class="phase-pill"><div class="num">🔗</div><div class="lbl">Phase 2</div><div>Get Live Link</div></div>
+    <div class="phase-pill"><div class="num">📦</div><div class="lbl">Phase 3</div><div>Build APK</div></div>
+    <div class="phase-pill"><div class="num">📤</div><div class="lbl">Phase 4</div><div>Share on WhatsApp</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- FILES YOU NEED -->
+  <div class="files-box">
+    <h2>📁 Files You Need to Upload (All Provided)</h2>
+    <div class="file-row">
+      <div class="file-icon">📄</div>
+      <div><div class="file-name">index.html</div><div class="file-desc">The main app — all screens, logic, and design</div></div>
+      <div class="file-badge">⭐ Most Important</div>
+    </div>
+    <div class="file-row">
+      <div class="file-icon">📋</div>
+      <div><div class="file-name">manifest.json</div><div class="file-desc">Tells Android how to install it as an app (name, icon, colors)</div></div>
+      <div class="file-badge">Required for APK</div>
+    </div>
+    <div class="file-row">
+      <div class="file-icon">⚙️</div>
+      <div><div class="file-name">sw.js</div><div class="file-desc">Makes the app work offline (no internet needed after install)</div></div>
+      <div class="file-badge">Required for APK</div>
+    </div>
+    <div class="file-row">
+      <div class="file-icon">🖼️</div>
+      <div><div class="file-name">icon-192.png &amp; icon-512.png</div><div class="file-desc">Mosque icon that appears on the phone home screen</div></div>
+      <div class="file-badge">App Icon</div>
+    </div>
+    <div class="callout tip" style="margin-top:16px;margin-bottom:0;">
+      <div class="icon">💡</div>
+      <div>All 5 files are already downloaded for you. Keep them all in <strong>one folder</strong> on your computer. Name the folder anything like <strong>quran-app</strong>.</div>
+    </div>
+  </div>
+
+  <!-- ============ PHASE 1: GITHUB ============ -->
+  <div class="phase-header">
+    <div class="phase-circle ph-green">1</div>
+    <div>
+      <h2>Create GitHub Account &amp; Repository</h2>
+      <p>GitHub is a free website that hosts your app files and gives you a public link. Like Google Drive but for websites.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-green">Step 1</div>
+    <h3>Go to GitHub and create a free account</h3>
+    <p>Open Chrome on your Windows PC and go to:</p>
+    <div class="url">github.com</div>
+    <p>Click the big <span class="btn-mock btn-green">Sign up</span> button. Fill in:</p>
+    <ul>
+      <li><strong>Email:</strong> Your Gmail or any email</li>
+      <li><strong>Password:</strong> Write it down somewhere!</li>
+      <li><strong>Username:</strong> Something simple — this becomes part of your app link.<br/>
+        Example: <span class="inp typed">qurantracker</span> → your link will be <span class="inp typed">qurantracker.github.io/quran-app</span></li>
+    </ul>
+    <p>They will send a code to your email. Check your inbox and enter the code to verify.</p>
+    <div class="callout warn"><div class="icon">⚠️</div><div>Choose your username carefully — it will be in the app link that your friends see. Keep it short and clean.</div></div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-green">Step 2</div>
+    <h3>Create a new repository (this is like a project folder)</h3>
+    <p>After logging in, look at the top-left. Click the green <span class="btn-mock btn-green">New</span> button — or find the <strong>＋</strong> icon at the top right → <strong>New repository</strong>.</p>
+    <p>Fill the form exactly like this:</p>
+    <ul>
+      <li><strong>Repository name:</strong> <span class="inp typed">quran-app</span></li>
+      <li><strong>Description:</strong> <span class="inp typed">Quran daily reading tracker</span> (optional)</li>
+      <li><strong>Public / Private:</strong> Select <span class="btn-mock btn-outline">⬤ Public</span> — this is required!</li>
+      <li>Check the box: <strong>☑ Add a README file</strong></li>
+    </ul>
+    <p>Then scroll down and click:</p>
+    <div class="btn-mock btn-green">✓ Create repository</div>
+    <div class="callout tip"><div class="icon">💡</div><div>You should now see an empty project page with a README. This is your repository. Now we upload the files.</div></div>
+  </div>
+
+  <!-- ============ PHASE 2: UPLOAD ============ -->
+  <div class="phase-header">
+    <div class="phase-circle ph-green">2</div>
+    <div>
+      <h2>Upload All 5 App Files</h2>
+      <p>Drag and drop your files into GitHub — like uploading photos to Google Drive.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-green">Step 3</div>
+    <h3>Upload all files at once</h3>
+    <p>On your repository page, click <span class="btn-mock btn-grey">Add file ▾</span> then select <strong>"Upload files"</strong>.</p>
+    <p>A big drag-and-drop box will appear. Drag ALL 5 files into it at the same time:</p>
+    <div class="folder">
+      <div>📁 Your quran-app folder on your PC:</div>
+      <div class="imp">  ├── index.html        ← drag this</div>
+      <div class="imp">  ├── manifest.json     ← drag this</div>
+      <div class="imp">  ├── sw.js             ← drag this</div>
+      <div class="imp">  ├── icon-192.png      ← drag this</div>
+      <div class="imp">  └── icon-512.png      ← drag this</div>
+    </div>
+    <div class="callout danger"><div class="icon">🚨</div><div><strong>All 5 files must be uploaded together.</strong> If you miss even one, the APK will not work properly. Select all 5 at once by holding Ctrl and clicking each file, then drag them all.</div></div>
+    <p>After uploading, scroll down to the bottom of the page. You will see a section called <strong>"Commit changes"</strong>. Just click:</p>
+    <div class="btn-mock btn-green">Commit changes</div>
+    <p>Wait a few seconds. Done! All your files are now on GitHub.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-green">Step 4</div>
+    <h3>Check that all files are there</h3>
+    <p>After committing, you should see your repository with all 5 files listed like this:</p>
+    <div class="terminal">
+      <span class="t-muted">📁 quran-app repository</span><br/>
+      <span class="t-green">✓</span> <span class="t-yellow">index.html</span><br/>
+      <span class="t-green">✓</span> <span class="t-yellow">manifest.json</span><br/>
+      <span class="t-green">✓</span> <span class="t-yellow">sw.js</span><br/>
+      <span class="t-green">✓</span> <span class="t-yellow">icon-192.png</span><br/>
+      <span class="t-green">✓</span> <span class="t-yellow">icon-512.png</span><br/>
+      <span class="t-green">✓</span> <span class="t-muted">README.md (auto-created)</span>
+    </div>
+    <p>If any file is missing, click <strong>Add file → Upload files</strong> again and upload the missing one.</p>
+  </div>
+
+  <!-- ============ PHASE 3: PAGES ============ -->
+  <div class="phase-header">
+    <div class="phase-circle ph-blue">3</div>
+    <div>
+      <h2>Turn On Hosting &amp; Get Your Live Link</h2>
+      <p>This makes your app available on the internet at a public link. Takes 2 minutes.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-blue">Step 5</div>
+    <h3>Open Settings → Pages</h3>
+    <p>In your repository, look at the top menu bar. Click <span class="btn-mock btn-grey">⚙ Settings</span> (it's the last tab on the right).</p>
+    <p>On the Settings page, look at the <strong>left sidebar</strong>. Scroll down until you find <strong>"Pages"</strong>. Click it.</p>
+    <div class="terminal">
+      <span class="t-muted">Settings sidebar:</span><br/>
+      &nbsp;&nbsp;General<br/>
+      &nbsp;&nbsp;Access<br/>
+      &nbsp;&nbsp;Branches<br/>
+      &nbsp;&nbsp;Tags<br/>
+      &nbsp;&nbsp;Rules<br/>
+      &nbsp;&nbsp;...<br/>
+      <span class="t-yellow">→ Pages</span>  <span class="t-green">← Click this</span>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-blue">Step 6</div>
+    <h3>Set the Branch to "main" and Save</h3>
+    <p>On the Pages settings page, look for the <strong>Branch</strong> section. There is a dropdown that says <strong>None</strong>. Click it and change it to <strong>main</strong>.</p>
+    <div class="terminal">
+      <span class="t-blue">Build and deployment</span><br/><br/>
+      Source: <span class="t-yellow">Deploy from a branch</span><br/><br/>
+      Branch: <span class="t-red">None</span>  <span class="t-muted">← change to</span>  <span class="t-green">main</span><br/>
+      Folder: <span class="t-yellow">/ (root)</span>  <span class="t-muted">← leave as is</span>
+    </div>
+    <p>Leave folder as <strong>/ (root)</strong>. Then click:</p>
+    <div class="btn-mock btn-blue">Save</div>
+    <div class="callout warn"><div class="icon">⏰</div><div>After clicking Save, <strong>wait 3–5 minutes</strong>. GitHub needs time to publish your app. Then refresh the page. Go drink some chai! ☕</div></div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-blue">Step 7</div>
+    <h3>Get your live link!</h3>
+    <p>After refreshing the Pages settings page, you will see a green success box at the top:</p>
+    <div class="callout tip">
+      <div class="icon">🎉</div>
+      <div>
+        <strong>Your site is live at:</strong><br/>
+        <span style="font-family:'Fira Code',monospace;font-size:15px;color:var(--blue);">https://YOUR-USERNAME.github.io/quran-app</span>
+      </div>
+    </div>
+    <p><strong>Copy this link.</strong> Open it in Chrome to test it — you should see your Quran Tracker app!</p>
+    <div class="url">https://your-username.github.io/quran-app</div>
+    <div class="callout important"><div class="icon">⭐</div><div>This link is your app's address forever. Save it in your WhatsApp notes or anywhere safe. You will use it in the next step.</div></div>
+  </div>
+
+  <!-- ============ PHASE 4: PWABUILDER ============ -->
+  <div class="phase-header">
+    <div class="phase-circle ph-purple">4</div>
+    <div>
+      <h2>Build the APK with PWABuilder</h2>
+      <p>PWABuilder is a free Microsoft tool. Paste your link → it gives you an APK file in minutes.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-purple">Step 8</div>
+    <h3>Go to PWABuilder website</h3>
+    <p>Open a new tab in Chrome and go to:</p>
+    <div class="url">pwabuilder.com</div>
+    <p>You will see a big search box in the middle of the page. It says something like <strong>"Enter the URL of your web app"</strong>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-purple">Step 9</div>
+    <h3>Enter your GitHub link and click Start</h3>
+    <p>Paste your GitHub Pages link into that box:</p>
+    <div class="inp typed" style="width:100%;display:block;">https://your-username.github.io/quran-app</div>
+    <p style="margin-top:10px;">Then click the button (it might say <strong>Start</strong> or <strong>→</strong> or <strong>Build my PWA</strong>).</p>
+    <div class="btn-mock btn-purple">→ Start</div>
+    <p style="margin-top:12px;">PWABuilder will now check your app. It takes about 30 seconds. You will see a loading spinner.</p>
+    <div class="callout tip"><div class="icon">💡</div><div>PWABuilder will show a <strong>score</strong> for your app (like 100/100 or 85/100). Don't worry about the score — just move to the next step.</div></div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-purple">Step 10</div>
+    <h3>Click "Package for stores" → Android</h3>
+    <p>After the scan finishes, you will see a results page. Look for a button that says:</p>
+    <div class="btn-mock btn-purple">📦 Package for stores</div>
+    <p style="margin-top:10px;">Click it. A new page appears showing 3 options:</p>
+    <div class="terminal">
+      <span class="t-green">🤖 Android</span>    <span class="t-muted">← Click this one</span><br/>
+      <span class="t-muted">🍎 iOS</span><br/>
+      <span class="t-muted">🪟 Windows</span>
+    </div>
+    <p>Click on <strong>Android</strong>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-purple">Step 11</div>
+    <h3>Generate and Download the APK</h3>
+    <p>You will see Android options. The default settings are fine — <strong>don't change anything</strong>. Just scroll down and click:</p>
+    <div class="btn-mock btn-purple">⬇ Download Package</div>
+    <div class="callout warn"><div class="icon">⚠️</div><div>PWABuilder will ask you to <strong>sign in with a Microsoft account</strong> (Outlook or Hotmail). If you don't have one, create a free one at outlook.com — it takes 2 minutes. This is required.</div></div>
+    <p>After signing in, the download will start. You will get a <strong>.zip file</strong> — probably named something like <span class="inp typed">quran-app.zip</span> or <span class="inp typed">pwabuilder-output.zip</span>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-purple">Step 12</div>
+    <h3>Find the APK inside the ZIP file</h3>
+    <p>The downloaded ZIP file contains your APK. Follow these steps on your Windows PC:</p>
+    <ol>
+      <li>Go to your <strong>Downloads</strong> folder</li>
+      <li>Right-click the ZIP file → click <strong>"Extract All"</strong> → click <strong>Extract</strong></li>
+      <li>Open the extracted folder. You will see several files and folders inside</li>
+      <li>Look for a file ending in <strong>.apk</strong> — it is usually inside a folder called <strong>android</strong> or directly in the main folder</li>
+    </ol>
+    <div class="terminal">
+      <span class="t-muted">📁 pwabuilder-output (extracted)</span><br/>
+      &nbsp;&nbsp;<span class="t-muted">📁 android/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="t-green">📱 QuranTracker.apk</span>  <span class="t-yellow">← This is your APK!</span><br/>
+      &nbsp;&nbsp;<span class="t-muted">📄 readme.txt</span><br/>
+      &nbsp;&nbsp;<span class="t-muted">📄 signing-instructions.md</span>
+    </div>
+    <div class="callout tip"><div class="icon">💡</div><div>The APK file size will be around <strong>1–5 MB</strong>. That's normal and small enough to send on WhatsApp.</div></div>
+  </div>
+
+  <!-- ============ PHASE 5: SHARE ============ -->
+  <div class="phase-header">
+    <div class="phase-circle ph-green">5</div>
+    <div>
+      <h2>Share the APK with Friends on WhatsApp</h2>
+      <p>Send the APK file directly in your WhatsApp group. Friends install it in 3 taps.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-green">Step 13</div>
+    <h3>Send APK on WhatsApp</h3>
+    <p>Open WhatsApp on your phone or WhatsApp Web on your PC. Go to your friend group. Tap the <strong>📎 attachment</strong> icon → select <strong>Document</strong> → choose the APK file.</p>
+    <div class="callout warn"><div class="icon">⚠️</div><div>WhatsApp only allows sending APKs as a <strong>Document</strong> (not as a file/media). Always choose "Document" when attaching.</div></div>
+    <p>Send this message along with the APK:</p>
+    <div class="wa-wrap">
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-bottom:6px;">📱 Group Chat</div>
+      <div class="wa-bubble">
+        🕌 Assalamualaykum bhai log!<br/><br/>
+        Maine hamara Quran Tracker app banaya hai! 📖<br/><br/>
+        <strong>Install karne ke steps:</strong><br/>
+        1️⃣ Ye file download karo (APK file above ☝️)<br/>
+        2️⃣ Phone mein Settings → Security → "Unknown sources" ON karo<br/>
+        3️⃣ Downloaded file open karo → Install dabao<br/>
+        4️⃣ App open karo → apna naam likho → reading log karna shuru! 🏆<br/><br/>
+        Dekhte hain kaun sabse zyada Quran padhta hai! 😄
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-badge sb-green">Step 14</div>
+    <h3>How friends install the APK (tell them this)</h3>
+    <p>When a friend receives the APK and tries to install it, Android will show a warning saying <strong>"Install blocked"</strong>. This is normal! Tell them:</p>
+    <ol>
+      <li>Go to phone <strong>Settings</strong></li>
+      <li>Search for <strong>"Install unknown apps"</strong> or <strong>"Unknown sources"</strong></li>
+      <li>Find <strong>WhatsApp</strong> in the list and <strong>allow</strong> it to install apps</li>
+      <li>Go back and open the APK file again → tap <strong>Install</strong></li>
+    </ol>
+    <div class="callout info"><div class="icon">ℹ️</div><div>This warning appears because the APK is not from the Play Store. It is completely safe — it's the app you built yourself. After installing once, they never see the warning again.</div></div>
+    <div class="callout tip"><div class="icon">📱</div><div>On Samsung phones specifically: when the warning appears, tap <strong>"Settings"</strong> in the popup → toggle ON → press Back → tap <strong>Install</strong>.</div></div>
+  </div>
+
+  <hr/>
+
+  <!-- SUMMARY CHECKLIST -->
+  <h2 style="font-size:22px;font-weight:900;margin-bottom:20px;">✅ Full Checklist</h2>
+  <ul class="checklist">
+    <li><span class="ck">☐</span> Created GitHub account at github.com</li>
+    <li><span class="ck">☐</span> Created repository named <strong>quran-app</strong> (Public)</li>
+    <li><span class="ck">☐</span> Uploaded all 5 files: index.html, manifest.json, sw.js, icon-192.png, icon-512.png</li>
+    <li><span class="ck">☐</span> Enabled GitHub Pages → Branch: main → Saved</li>
+    <li><span class="ck">☐</span> Waited 3–5 minutes → Got live link (github.io/quran-app)</li>
+    <li><span class="ck">☐</span> Tested live link in Chrome — app loads ✓</li>
+    <li><span class="ck">☐</span> Went to pwabuilder.com → pasted link → clicked Start</li>
+    <li><span class="ck">☐</span> Clicked "Package for stores" → Android → Download Package</li>
+    <li><span class="ck">☐</span> Extracted ZIP → found the .apk file</li>
+    <li><span class="ck">☐</span> Sent APK to WhatsApp group as a Document</li>
+    <li><span class="ck">☐</span> Friends installed it → everyone is tracking! 🎉</li>
+  </ul>
+
+  <!-- PROBLEMS -->
+  <h2 style="font-size:20px;font-weight:900;margin:40px 0 20px;">🔧 If Something Goes Wrong</h2>
+
+  <div class="step">
+    <h3>❓ PWABuilder says "score too low" or fails</h3>
+    <p>Don't worry. Click <strong>"Package for stores"</strong> anyway — it usually still works. The score is just a suggestion, not a blocker. If it truly won't continue, come back and tell me — we'll fix it in 5 minutes.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ GitHub Pages link shows "404 Not Found"</h3>
+    <p>Two possible reasons: (1) Wait more — sometimes it takes up to 10 minutes the very first time. (2) Make sure the file is named exactly <strong>index.html</strong> with all small letters, not Index.html or INDEX.HTML.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ Friend's phone says "App not installed"</h3>
+    <p>This usually means the phone doesn't have enough storage, or there's a conflict with an old version. Tell your friend to restart their phone and try installing again.</p>
+  </div>
+
+  <div class="step">
+    <h3>❓ I can't find the .apk file in the ZIP</h3>
+    <p>Look inside every folder in the extracted ZIP. Try the folders named <strong>android</strong>, <strong>release</strong>, or <strong>signed</strong>. The file ends in <strong>.apk</strong>. If you still can't find it, PWABuilder sometimes puts it directly in the root of the ZIP.</p>
+  </div>
+
+  <!-- FINAL -->
+  <div class="final">
+    <h2>🌙 You Did It!</h2>
+    <p>Your Quran Tracker is now a real Android app that your friends can install. May Allah make it a source of barakah for your whole group. 🤲</p>
+    <p style="margin-top:16px;font-size:14px;opacity:.7;">If you get stuck at any step, just say "I'm stuck at Step X" and I'll guide you through it immediately.</p>
+  </div>
+
+</div>
+</body>
+</html>
