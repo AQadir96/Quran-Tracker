@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#d4a843"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quran Tracker — Daily Progress</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --surface3: #21262d;
+    --border: #30363d;
+    --gold: #d4a843;
+    --gold2: #f0c060;
+    --green: #3fb950;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #388bfd;
+    --radius: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Subtle star bg */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 20% 10%, rgba(212,168,67,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(56,139,253,0.05) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+  /* ---- HEADER ---- */
+  header {
+    position: relative; z-index: 10;
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,17,23,0.9);
+    backdrop-filter: blur(12px);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text { font-size: 18px; font-weight: 600; letter-spacing: -.3px; }
+  .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  /* ---- TABS ---- */
+  .tabs {
+    position: relative; z-index: 5;
+    display: flex; gap: 0;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 12px 14px;
+    font-size: 12px; font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: .2px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  /* ---- MAIN ---- */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 12px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 16px;
+  }
+  /* ---- BUTTONS ---- */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0d1117;
+  }
+  .btn-gold:hover { opacity: .9; transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--text); }
+  /* ---- FORM ---- */
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  select, input {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select:focus, input:focus { border-color: var(--gold); }
+  select option { background: var(--surface3); }
+  /* ---- GRID ---- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width:700px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    header { padding: 14px 16px; }
+    main { padding: 20px 14px; }
+    .tabs { padding: 0 12px; overflow-x: auto; }
+  }
+  /* ---- STAT CARD ---- */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stat-card.gold::after { background: linear-gradient(90deg, var(--gold), var(--gold2)); }
+  .stat-card.green::after { background: var(--green); }
+  .stat-card.blue::after { background: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+  .stat-val { font-size: 28px; font-weight: 700; margin: 6px 0 2px; color: var(--gold2); }
+  .stat-sub { font-size: 12px; color: var(--muted); }
+  /* ---- PROGRESS BAR ---- */
+  .progress-wrap { margin: 8px 0; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .progress-bar { height: 6px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold), var(--gold2)); transition: width .6s ease; }
+  /* ---- LEADERBOARD ---- */
+  .lb-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { font-size: 14px; font-weight: 700; width: 24px; text-align: center; }
+  .lb-rank.gold { color: #ffd700; }
+  .lb-rank.silver { color: #c0c0c0; }
+  .lb-rank.bronze { color: #cd7f32; }
+  .lb-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .lb-info { flex: 1; }
+  .lb-name { font-size: 14px; font-weight: 600; }
+  .lb-detail { font-size: 11px; color: var(--muted); }
+  .lb-pages { font-size: 18px; font-weight: 700; color: var(--gold2); }
+  /* ---- LOG LIST ---- */
+  .log-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+    margin-top: 5px; flex-shrink: 0;
+  }
+  .log-text { font-size: 13px; line-height: 1.6; }
+  .log-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  /* ---- ARABIC ---- */
+  .arabic { font-family: 'Amiri', serif; direction: rtl; }
+  /* ---- BADGE ---- */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    border-radius: 99px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(212,168,67,0.15);
+    color: var(--gold2);
+    border: 1px solid rgba(212,168,67,0.3);
+  }
+  .badge.green { background: rgba(63,185,80,0.1); color: var(--green); border-color: rgba(63,185,80,0.3); }
+  /* ---- USER SELECTOR ---- */
+  .user-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 6px 14px 6px 8px;
+    cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    transition: border-color .2s;
+  }
+  .user-pill:hover { border-color: var(--gold); }
+  .user-pill .avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%; max-width: 480px;
+    margin: 16px;
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  /* ---- NOTIFY ---- */
+  .notify {
+    position: fixed; top: 20px; right: 20px; z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px; font-weight: 500;
+    display: none;
+    animation: fadeIn .3s ease;
+    box-shadow: var(--shadow);
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  /* ---- JUZZ GRID ---- */
+  .juz-cell.partial{background:rgba(212,168,67,.1);border-color:rgba(212,168,67,.35);}
+  .juz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+  .juz-cell {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    font-size: 13px;
+  }
+  .juz-cell:hover { border-color: var(--gold); background: rgba(212,168,67,0.08); }
+  .juz-cell.partial { background: rgba(212,168,67,0.15); border-color: rgba(212,168,67,0.4); }
+  .juz-cell.partial { background:rgba(212,168,67,.15); border-color:rgba(212,168,67,.4); }
+  .juz-cell.partial { background:rgba(212,168,67,.08); border-color:rgba(212,168,67,.3); }
+  .juz-cell.read { background: rgba(212,168,67,0.25); border-color: rgba(212,168,67,0.7); color: var(--gold2); font-weight:700; }
+  .juz-cell .juz-num { font-size: 18px; font-weight: 700; }
+  .juz-cell .juz-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  /* ---- SUB SEGMENTS ---- */
+  .seg-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface3);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .seg-row:hover { background: var(--surface2); }
+  .seg-row input[type=checkbox] { accent-color: var(--gold); width: 16px; height: 16px; cursor: pointer; flex-shrink:0; }
+  .seg-info { flex: 1; }
+  .seg-name { font-size: 13px; font-weight: 500; }
+  .seg-sub { font-size: 11px; color: var(--muted); }
+  /* ---- CHART ---- */
+  .chart-wrap { position: relative; height: 240px; }
+  /* ---- EMPTY STATE ---- */
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; }
+  /* ---- SECTION TITLE ---- */
+  .section-title {
+    font-size: 20px; font-weight: 700;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title span { color: var(--gold); }
+  /* ---- NAMES INPUT ---- */
+  .name-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 5px 10px 5px 8px;
+    font-size: 12px;
+  }
+  .chip .chip-del { cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1; }
+  .chip .chip-del:hover { color: #f85149; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ---- TOGGLE SWITCH ---- */
+  .toggle-switch { position:relative; width:44px; height:24px; flex-shrink:0; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider { position:absolute; inset:0; background:var(--surface3); border-radius:99px; cursor:pointer; transition:.3s; border:1px solid var(--border); }
+  .toggle-slider:before { content:""; position:absolute; width:18px; height:18px; border-radius:50%; background:var(--muted); bottom:2px; left:2px; transition:.3s; }
+  .toggle-switch input:checked + .toggle-slider { background:rgba(212,168,67,.3); border-color:var(--gold); }
+  .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); background:var(--gold); }
+  /* ---- READING TYPE BADGE ---- */
+
+  /* ---- ADMIN ---- */
+  .admin-user-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .admin-user-row:last-child { border-bottom:none; }
+  .admin-actions { display:flex; gap:6px; margin-left:auto; }
+  .btn-danger { background:rgba(231,76,60,.12); border:1px solid rgba(231,76,60,.3); color:#e74c3c; }
+  .btn-warn { background:rgba(255,165,0,.1); border:1px solid rgba(255,165,0,.3); color:orange; }
+  /* ---- SYNC DOT in header ---- */
+  .sync-indicator { width:8px; height:8px; border-radius:50%; background:#666; transition:background .5s; }
+  .sync-indicator.live { background:var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+</style>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import{getFirestore,collection,addDoc,onSnapshot,query,orderBy,deleteDoc,where,getDocs,doc}
+  from"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+const cfg={
+  apiKey:"AIzaSyDIa2Klm7lRI7xDlion2YNeYr5n2PB4byc",
+  authDomain:"quran-tracker-2026.firebaseapp.com",
+  projectId:"quran-tracker-2026",
+  storageBucket:"quran-tracker-2026.firebasestorage.app",
+  messagingSenderId:"978262243606",
+  appId:"1:978262243606:web:144665037dc77dc291b837"
+};
+const app=initializeApp(cfg);
+const db=getFirestore(app);
+window._fb={db,collection,addDoc,onSnapshot,query,orderBy,deleteDoc,where,getDocs,doc};
+window._fbOK=true;
+</script>
+</head>
+<body>
+
+<!-- Notification -->
+<div class="notify" id="notify"></div>
+
+<!-- User Select Modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <div class="modal-title">👤 Who are you?</div>
+    <div id="userList" style="margin-bottom:16px;"></div>
+    <div style="display:flex;gap:10px;">
+      <input id="newUserInput" placeholder="Add new person…" style="flex:1;" />
+      <button class="btn btn-gold" onclick="addUser()">Add</button>
+    </div>
+    <div class="name-chips" id="userChips"></div>
+  </div>
+</div>
+
+<!-- Log Reading Modal -->
+<div class="modal-overlay" id="logModal">
+  <div class="modal">
+    <div class="modal-title">📖 Log Today's Reading</div>
+    <div class="form-group">
+      <label>Log by</label>
+      <select id="logBySelect" onchange="updateLogForm()">
+        <option value="juz">Juz (Para)</option>
+        <option value="surah">Surah</option>
+      </select>
+    </div>
+    <div id="juzLogForm">
+      <div class="form-group">
+        <label>Select Juz</label>
+        <select id="logJuzSelect" onchange="updateSegments()"></select>
+      </div>
+      <div class="form-group">
+        <label>Mark by</label>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button id="mSegRubBtn"  class="btn btn-gold"    style="flex:1;padding:7px;font-size:12px;font-weight:600;" onclick="setSegMode('rub',  'modal')">📖 Rub' (Quarter)</button>
+          <button id="mSegRukuBtn" class="btn btn-outline" style="flex:1;padding:7px;font-size:12px;font-weight:600;" onclick="setSegMode('ruku', 'modal')">🔖 Ruku</button>
+        </div>
+        <div id="segmentChecks"></div>
+      </div>
+    </div>
+    <div id="surahLogForm" style="display:none;">
+            <div id="surahContinueHint" style="margin-bottom:10px;"></div>
+      <div class="form-group">
+        <label>Select Surah</label>
+        <select id="logSurahSelect" onchange="updateAyahRange()"></select>
+      </div>
+      <div class="grid2" id="ayahRangeGroup">
+        <div class="form-group">
+          <label>From Ayah</label>
+          <input type="number" id="fromAyah" min="1" value="1" />
+        </div>
+        <div class="form-group">
+          <label>To Ayah</label>
+          <input type="number" id="toAyah" min="1" value="7" />
+        </div>
+      </div>
+      <div id="surahProgress" class="progress-wrap"></div>
+    </div>
+    <div class="form-group">
+      <label>Note (optional)</label>
+      <input id="logNote" placeholder="e.g. Morning after Fajr…" />
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-gold" style="flex:1;" onclick="submitLog()">✓ Save Reading</button>
+      <button class="btn btn-outline" onclick="closeModal('logModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🕌</div>
+    <div>
+      <div class="logo-text">Quran Tracker</div>
+      <div class="logo-sub">Daily Progress</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="sync-indicator" id="headerSyncDot" title="Firebase sync status"></div><button class="btn btn-outline" onclick="openModal('logModal')">+ Log Reading</button>
+    <div class="user-pill" onclick="openModal('userModal')">
+      <div class="avatar" id="headerAvatar" style="background:#d4a843;color:#000;"></div>
+      <span id="headerName">Select User</span>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" onclick="switchTab('log')">📖 Log Reading</div>
+  <div class="tab" onclick="switchTab('progress')">🗺 My Progress</div>
+  <div class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</div>
+  <div class="tab" onclick="switchTab('settings')">⚙️ Settings</div>
+  <div class="tab" onclick="openAdminLogin()">🔐 Admin</div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="page-dashboard" class="page active">
+    <div class="section-title">Today's <span>Overview</span></div>
+    <div id="todayBanner"></div>
+    <div class="grid3" id="statCards">
+      <div class="stat-card gold">
+        <div class="stat-label">Total Pages Read</div>
+        <div class="stat-val" id="statTotal">0</div>
+        <div class="stat-sub">All users combined</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">My Pages Today</div>
+        <div class="stat-val" id="statToday">0</div>
+        <div class="stat-sub" id="statTodaySub">Not logged yet</div>
+      </div>
+      <div class="stat-card" style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--green);">
+        <div class="stat-label">🔥 Streak &amp; Completion</div>
+        <div class="stat-val" id="statStreak">0 days</div>
+        <div class="stat-sub" id="statStreakSub"></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">My Quran Complete</div>
+        <div class="stat-val" id="statPct">0%</div>
+        <div class="stat-sub" id="statAyahs">0 / 6236 ayahs</div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:20px;">
+      <div class="card">
+        <div class="card-title">Weekly Reading (Pages)</div>
+        <div class="chart-wrap"><canvas id="weekChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Readers Today</div>
+        <div id="topToday"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">My Quran Progress — Juz Overview</div>
+      <div id="juzProgressBars"></div>
+    </div>
+  </div>
+
+  <!-- LOG PAGE -->
+  <div id="page-log" class="page">
+    <div class="section-title">📖 <span>Log</span> Your Reading</div>
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="card-title">Quick Log</div>
+
+          <div class="form-group">
+            <label>Log by</label>
+            <select id="quickLogBy" onchange="updateQuickForm()">
+              <option value="juz">Juz (Para)</option>
+              <option value="surah">Surah</option>
+            </select>
+          </div>
+          <div id="quickJuzForm">
+            <div class="form-group">
+              <label>Select Juz</label>
+              <select id="quickJuzSel" onchange="updateQuickSegments()"></select>
+            </div>
+            <div class="form-group">
+              <label>Mark by</label>
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <button id="qSegRubBtn"  class="btn btn-gold"    style="flex:1;padding:7px;font-size:12px;font-weight:600;" onclick="setSegMode('rub','quick')">📖 Rub'</button>
+                <button id="qSegRukuBtn" class="btn btn-outline" style="flex:1;padding:7px;font-size:12px;font-weight:600;" onclick="setSegMode('ruku','quick')">🔖 Ruku</button>
+              </div>
+              <div id="quickSegChecks"></div>
+            </div>
+          </div>
+          <div id="quickSurahForm" style="display:none;">
+            <div class="form-group">
+              <label>Select Surah</label>
+              <select id="quickSurahSel" onchange="updateQuickAyah()"></select>
+            </div>
+            <div id="quickSurahHint" style="margin-bottom:10px;"></div>
+            <div class="grid2">
+              <div class="form-group">
+                <label>From Ayah</label>
+                <input type="number" id="quickFrom" min="1" value="1" />
+              </div>
+              <div class="form-group">
+                <label>To Ayah</label>
+                <input type="number" id="quickTo" min="1" />
+              </div>
+            </div>
+            <div id="quickSurahProg" class="progress-wrap"></div>
+          </div>
+          <div class="form-group">
+            <label>Note (optional)</label>
+            <input id="quickNote" placeholder="e.g. After Fajr salah…" />
+          </div>
+          <button class="btn btn-gold" style="width:100%;" onclick="submitQuickLog()">✓ Save Reading</button>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">My Recent Logs <span style="font-size:11px;color:var(--muted);font-weight:400;">(tap to edit/delete)</span></div>
+          <div id="recentLogs"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT LOG MODAL -->
+  <div class="modal-overlay" id="editLogModal">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-title">✏️ Edit / Delete Log</div>
+      <div id="editLogDetails" style="font-size:13px;color:var(--muted);margin-bottom:16px;padding:10px;background:var(--surface3);border-radius:8px;"></div>
+      <div class="form-group">
+        <label>Edit Note</label>
+        <input type="text" id="editLogNote" placeholder="Add or change note…"/>
+      </div>
+      <div class="form-group" id="editAyahGroup">
+        <label>Edit Ayah Range</label>
+        <div class="grid2">
+          <div class="form-group">
+            <label>From Ayah</label>
+            <input type="number" id="editFromAyah" min="1"/>
+          </div>
+          <div class="form-group">
+            <label>To Ayah</label>
+            <input type="number" id="editToAyah" min="1"/>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;" id="editDeleteNote"></div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="btn btn-gold" style="flex:1;" onclick="saveEditLog()">✓ Save</button>
+        <button id="editDeleteBtn" class="btn btn-danger" style="flex:1;" onclick="this.textContent='Deleting…';deleteLog()">🗑 Delete</button>
+        <button class="btn btn-outline" onclick="closeModal('editLogModal')">Cancel</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center;">🗑 Delete is only available for today's logs</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS PAGE -->
+  <div id="page-progress" class="page">
+    <div class="section-title">🗺 My <span>Progress Map</span></div>
+    <div class="card">
+      <div class="card-title">Juz Completion Grid <span style="font-size:11px;color:var(--muted);font-weight:400;">(updates from both Surah &amp; Juz logs)</span></div>
+      <div class="juz-grid" id="juzGrid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Juz Completion Chart</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="juzBarChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📖 Surah Completion Grid <span style="font-size:11px;color:var(--muted);font-weight:400;">— all 114 surahs</span></div>
+      <div id="surahCompletionGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:5px;margin-bottom:4px;"></div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--muted);">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--green);display:inline-block;"></span>100%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--gold);display:inline-block;"></span>Partial</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--surface3);border:1px solid var(--border);display:inline-block;"></span>Unread</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Surah Detail Progress</div>
+      <div id="surahProgressList"></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD PAGE -->
+  <div id="page-leaderboard" class="page">
+    <div class="section-title">🏆 <span>Leaderboard</span></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">All-Time Pages Read</div>
+        <div id="lbAllTime"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">This Week</div>
+        <div id="lbWeek"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Group Progress Chart</div>
+      <div class="chart-wrap"><canvas id="groupChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div id="page-settings" class="page">
+    <div class="section-title" style="margin-bottom:20px;">⚙️ Settings</div>
+
+    <!-- Fajr Reminder -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">🌅 Fajr Reminder</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:14px;font-weight:600;">Daily Fajr Reminder</div>
+          <div style="font-size:12px;color:var(--muted);">Get notified to log your reading</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="reminderToggle" onchange="toggleReminder()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div id="reminderTimeWrap" style="display:none;">
+        <div class="form-group">
+          <label>Reminder Time</label>
+          <input type="time" id="reminderTime" value="05:30" onchange="saveReminderTime()"/>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">Fires daily at this time if you haven't logged yet.</div>
+      </div>
+    </div>
+
+    <!-- Sync Status -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">☁️ Firebase Sync</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div id="syncStatusDot" style="width:10px;height:10px;border-radius:50%;background:#666;flex-shrink:0;transition:background .3s;"></div>
+        <div style="font-size:14px;font-weight:600;" id="syncStatusText">Connecting…</div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;">All readings sync live. Everyone's leaderboard updates in real time across all devices.</div>
+    </div>
+
+    <!-- About -->
+    <div class="card">
+      <div class="card-title">ℹ️ About</div>
+      <div style="font-size:13px;color:var(--muted);line-height:2;">
+        Version 3.0 · Firebase Live Sync<br/>
+        114 Surahs · 30 Juz · 6,236 Ayahs<br/>
+        ⭐ Primary: leaderboard &amp; completion %<br/>
+        📚 Secondary: personal extra reading
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE (password protected) -->
+  <div id="page-admin" class="page">
+    <div class="section-title" style="margin-bottom:20px;">🔐 Admin Panel</div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">👥 User Management</div>
+      <div id="adminUserList" style="margin-bottom:16px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="adminNewUser" placeholder="Add new user name…" style="flex:1;"/>
+        <button class="btn btn-gold" onclick="adminAddUser()">Add User</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">🗑 Data Management</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <button class="btn btn-outline" onclick="adminExportData()" style="color:var(--accent);border-color:var(--accent);">📥 Export All Data</button>
+        <button class="btn btn-outline" onclick="adminLogout()" style="color:var(--muted);">🚪 Logout Admin</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 System Stats</div>
+      <div id="adminStats" style="font-size:13px;color:var(--muted);line-height:2.2;"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN MODAL -->
+  <div class="modal-overlay" id="adminLoginModal">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-title">🔐 Admin Login</div>
+      <div class="form-group">
+        <label>Admin Password</label>
+        <input type="password" id="adminPwInput" placeholder="Enter password…" onkeydown="if(event.key==='Enter')checkAdminPw()"/>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-gold" style="flex:1;" onclick="checkAdminPw()">Login</button>
+        <button class="btn btn-outline" onclick="closeModal('adminLoginModal')">Cancel</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DELETE USER CONFIRM MODAL -->
+  <div class="modal-overlay" id="adminDeleteModal">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-title" id="adminDeleteTitle">Delete User?</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:20px;" id="adminDeleteMsg"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1;background:#e74c3c;color:#fff;" onclick="adminConfirmDelete()">Yes, Delete</button>
+        <button class="btn btn-outline" onclick="closeModal('adminDeleteModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+
+// ════════════════════════════════════════════════
+// ADMIN — SHA-256 password (no username needed)
+// ════════════════════════════════════════════════
+const ADMIN_PW_HASH_KEY = 'qt_admin_hash';
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function initAdminHash() {
+  if (!localStorage.getItem(ADMIN_PW_HASH_KEY)) {
+    localStorage.setItem(ADMIN_PW_HASH_KEY, await sha256('quran2026'));
+  }
+}
+
+let adminLoggedIn = false;
+
+function openAdminLogin() {
+  if (adminLoggedIn) { switchTab('admin'); return; }
+  openModal('adminLoginModal');
+  setTimeout(()=>{ const el=document.getElementById('adminPwInput'); if(el) el.focus(); }, 300);
+}
+
+async function checkAdminPw() {
+  const pw = document.getElementById('adminPwInput').value;
+  const hash = await sha256(pw);
+  const stored = localStorage.getItem(ADMIN_PW_HASH_KEY);
+  if (hash === stored) {
+    adminLoggedIn = true;
+    document.getElementById('adminPwInput').value = '';
+    closeModal('adminLoginModal');
+    switchTab('admin');
+    renderAdminPanel();
+    showNotify('✅ Admin access granted');
+  } else {
+    showNotify('❌ Wrong password');
+    document.getElementById('adminPwInput').value = '';
+  }
+}
+
+function adminLogout() {
+  adminLoggedIn = false;
+  switchTab('dashboard');
+  showNotify('Logged out of admin');
+}
+
+function renderAdminPanel() {
+  if (!adminLoggedIn) return;
+  const allUsers = [...new Set(state.logs.map(l=>l.user).concat(state.users))].filter(Boolean);
+  const el = document.getElementById('adminUserList');
+  el.innerHTML = allUsers.length ? allUsers.map(u => {
+    const userLogs = state.logs.filter(l=>l.user===u);
+    return `<div class="admin-user-row">
+      <div class="lb-avatar" style="background:${avatarColor(u)};color:#000;">${initials(u)}</div>
+      <div class="lb-info">
+        <div class="lb-name">${sanitize(u)}</div>
+        <div class="lb-detail">${userLogs.length} total logs</div>
+      </div>
+      <div class="admin-actions">
+        <button class="btn btn-warn" style="padding:5px 10px;font-size:12px;" onclick="adminResetUser('${sanitize(u)}')">Reset</button>
+        <button class="btn btn-danger" style="padding:5px 10px;font-size:12px;" onclick="adminPromptDelete('${sanitize(u)}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted);font-size:13px;">No users yet.</div>';
+
+  document.getElementById('adminStats').innerHTML = `
+    Total users: <strong>${allUsers.length}</strong><br/>
+    Total logs: <strong>${state.logs.length}</strong><br/>
+    Firebase synced: <strong>${state.logs.filter(l=>l._fbId).length}</strong>
+  `;
+}
+
+function adminAddUser() {
+  const name = sanitize(document.getElementById('adminNewUser').value.trim());
+  if (!name) return;
+  if (state.users.includes(name)) { showNotify('User already exists'); return; }
+  state.users.push(name);
+  saveState();
+  document.getElementById('adminNewUser').value = '';
+  renderAdminPanel();
+  showNotify(`User "${name}" added`);
+}
+
+let _adminDeleteTarget = null;
+function adminPromptDelete(user) {
+  _adminDeleteTarget = user;
+  document.getElementById('adminDeleteTitle').textContent = `Delete "${user}"?`;
+  document.getElementById('adminDeleteMsg').textContent =
+    `This removes all ${state.logs.filter(l=>l.user===user).length} logs for ${user}. Cannot be undone.`;
+  openModal('adminDeleteModal');
+}
+
+async function adminConfirmDelete() {
+  if (!_adminDeleteTarget) return;
+  const user = _adminDeleteTarget;
+  // Blocklist all logs for deleted user
+  state.logs.filter(l=>l.user===user).forEach(l=>{ addDeletedId(l.id); addDeletedId(l._fbId); });
+  state.logs = state.logs.filter(l=>l.user!==user);
+  state.users = state.users.filter(u=>u!==user);
+  if (state.currentUser === user) state.currentUser = state.users[0]||null;
+  saveState();
+  try {
+    if (window._fbOK) {
+      const {db,collection,query,where,getDocs,deleteDoc,doc} = window._fb;
+      const q = query(collection(db,'logs'), where('user','==',user));
+      const snap = await getDocs(q);
+      await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'logs',d.id))));
+    }
+  } catch(e) { console.warn('FB delete:', e); }
+  closeModal('adminDeleteModal');
+  renderAdminPanel();
+  renderAll();
+  updateHeader();
+  showNotify(`"${user}" deleted`);
+  _adminDeleteTarget = null;
+}
+
+function adminResetUser(user) {
+  if (!confirm(`Reset ALL readings for ${user}?`)) return;
+  // Blocklist all their log IDs before removing
+  state.logs.filter(l=>l.user===user).forEach(l=>{ addDeletedId(l.id); addDeletedId(l._fbId); });
+  state.logs = state.logs.filter(l=>l.user!==user);
+  saveState();
+  renderAdminPanel();
+  renderAll();
+  showNotify(`"${user}" readings reset`);
+}
+
+function adminExportData() {
+  const data = JSON.stringify({exported:new Date().toISOString(),logs:state.logs,users:state.users},null,2);
+  const blob = new Blob([data],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quran-tracker-backup-${todayStr()}.json`;
+  a.click();
+  showNotify('Data exported!');
+}
+
+// ════════════════════════════════════════════════
+// SECURITY
+// ════════════════════════════════════════════════
+function sanitize(str) {
+  return (str||'').replace(/[<>&"'`]/g,
+    c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])
+  ).slice(0,100);
+}
+
+// ════════════════════════════════════════════════
+// QURAN DATA
+// ════════════════════════════════════════════════
+const SURAHS = [
+  {n:1,name:"Al-Fatiha",arabic:"الفاتحة",ayahs:7,juz:1},
+  {n:2,name:"Al-Baqarah",arabic:"البقرة",ayahs:286,juz:1},
+  {n:3,name:"Al-Imran",arabic:"آل عمران",ayahs:200,juz:3},
+  {n:4,name:"An-Nisa",arabic:"النساء",ayahs:176,juz:4},
+  {n:5,name:"Al-Maidah",arabic:"المائدة",ayahs:120,juz:6},
+  {n:6,name:"Al-Anam",arabic:"الأنعام",ayahs:165,juz:7},
+  {n:7,name:"Al-Araf",arabic:"الأعراف",ayahs:206,juz:8},
+  {n:8,name:"Al-Anfal",arabic:"الأنفال",ayahs:75,juz:9},
+  {n:9,name:"At-Tawbah",arabic:"التوبة",ayahs:129,juz:10},
+  {n:10,name:"Yunus",arabic:"يونس",ayahs:109,juz:11},
+  {n:11,name:"Hud",arabic:"هود",ayahs:123,juz:11},
+  {n:12,name:"Yusuf",arabic:"يوسف",ayahs:111,juz:12},
+  {n:13,name:"Ar-Rad",arabic:"الرعد",ayahs:43,juz:13},
+  {n:14,name:"Ibrahim",arabic:"إبراهيم",ayahs:52,juz:13},
+  {n:15,name:"Al-Hijr",arabic:"الحجر",ayahs:99,juz:14},
+  {n:16,name:"An-Nahl",arabic:"النحل",ayahs:128,juz:14},
+  {n:17,name:"Al-Isra",arabic:"الإسراء",ayahs:111,juz:15},
+  {n:18,name:"Al-Kahf",arabic:"الكهف",ayahs:110,juz:15},
+  {n:19,name:"Maryam",arabic:"مريم",ayahs:98,juz:16},
+  {n:20,name:"Ta-Ha",arabic:"طه",ayahs:135,juz:16},
+  {n:21,name:"Al-Anbiya",arabic:"الأنبياء",ayahs:112,juz:17},
+  {n:22,name:"Al-Hajj",arabic:"الحج",ayahs:78,juz:17},
+  {n:23,name:"Al-Muminun",arabic:"المؤمنون",ayahs:118,juz:18},
+  {n:24,name:"An-Nur",arabic:"النور",ayahs:64,juz:18},
+  {n:25,name:"Al-Furqan",arabic:"الفرقان",ayahs:77,juz:18},
+  {n:26,name:"Ash-Shuara",arabic:"الشعراء",ayahs:227,juz:19},
+  {n:27,name:"An-Naml",arabic:"النمل",ayahs:93,juz:19},
+  {n:28,name:"Al-Qasas",arabic:"القصص",ayahs:88,juz:20},
+  {n:29,name:"Al-Ankabut",arabic:"العنكبوت",ayahs:69,juz:20},
+  {n:30,name:"Ar-Rum",arabic:"الروم",ayahs:60,juz:21},
+  {n:31,name:"Luqman",arabic:"لقمان",ayahs:34,juz:21},
+  {n:32,name:"As-Sajdah",arabic:"السجدة",ayahs:30,juz:21},
+  {n:33,name:"Al-Ahzab",arabic:"الأحزاب",ayahs:73,juz:21},
+  {n:34,name:"Saba",arabic:"سبأ",ayahs:54,juz:22},
+  {n:35,name:"Fatir",arabic:"فاطر",ayahs:45,juz:22},
+  {n:36,name:"Ya-Sin",arabic:"يس",ayahs:83,juz:22},
+  {n:37,name:"As-Saffat",arabic:"الصافات",ayahs:182,juz:23},
+  {n:38,name:"Sad",arabic:"ص",ayahs:88,juz:23},
+  {n:39,name:"Az-Zumar",arabic:"الزمر",ayahs:75,juz:23},
+  {n:40,name:"Ghafir",arabic:"غافر",ayahs:85,juz:24},
+  {n:41,name:"Fussilat",arabic:"فصلت",ayahs:54,juz:24},
+  {n:42,name:"Ash-Shura",arabic:"الشورى",ayahs:53,juz:25},
+  {n:43,name:"Az-Zukhruf",arabic:"الزخرف",ayahs:89,juz:25},
+  {n:44,name:"Ad-Dukhan",arabic:"الدخان",ayahs:59,juz:25},
+  {n:45,name:"Al-Jathiyah",arabic:"الجاثية",ayahs:37,juz:25},
+  {n:46,name:"Al-Ahqaf",arabic:"الأحقاف",ayahs:35,juz:26},
+  {n:47,name:"Muhammad",arabic:"محمد",ayahs:38,juz:26},
+  {n:48,name:"Al-Fath",arabic:"الفتح",ayahs:29,juz:26},
+  {n:49,name:"Al-Hujurat",arabic:"الحجرات",ayahs:18,juz:26},
+  {n:50,name:"Qaf",arabic:"ق",ayahs:45,juz:26},
+  {n:51,name:"Adh-Dhariyat",arabic:"الذاريات",ayahs:60,juz:26},
+  {n:52,name:"At-Tur",arabic:"الطور",ayahs:49,juz:27},
+  {n:53,name:"An-Najm",arabic:"النجم",ayahs:62,juz:27},
+  {n:54,name:"Al-Qamar",arabic:"القمر",ayahs:55,juz:27},
+  {n:55,name:"Ar-Rahman",arabic:"الرحمن",ayahs:78,juz:27},
+  {n:56,name:"Al-Waqiah",arabic:"الواقعة",ayahs:96,juz:27},
+  {n:57,name:"Al-Hadid",arabic:"الحديد",ayahs:29,juz:27},
+  {n:58,name:"Al-Mujadila",arabic:"المجادلة",ayahs:22,juz:28},
+  {n:59,name:"Al-Hashr",arabic:"الحشر",ayahs:24,juz:28},
+  {n:60,name:"Al-Mumtahanah",arabic:"الممتحنة",ayahs:13,juz:28},
+  {n:61,name:"As-Saf",arabic:"الصف",ayahs:14,juz:28},
+  {n:62,name:"Al-Jumuah",arabic:"الجمعة",ayahs:11,juz:28},
+  {n:63,name:"Al-Munafiqun",arabic:"المنافقون",ayahs:11,juz:28},
+  {n:64,name:"At-Taghabun",arabic:"التغابن",ayahs:18,juz:28},
+  {n:65,name:"At-Talaq",arabic:"الطلاق",ayahs:12,juz:28},
+  {n:66,name:"At-Tahrim",arabic:"التحريم",ayahs:12,juz:28},
+  {n:67,name:"Al-Mulk",arabic:"الملك",ayahs:30,juz:29},
+  {n:68,name:"Al-Qalam",arabic:"القلم",ayahs:52,juz:29},
+  {n:69,name:"Al-Haqqah",arabic:"الحاقة",ayahs:52,juz:29},
+  {n:70,name:"Al-Maarij",arabic:"المعارج",ayahs:44,juz:29},
+  {n:71,name:"Nuh",arabic:"نوح",ayahs:28,juz:29},
+  {n:72,name:"Al-Jinn",arabic:"الجن",ayahs:28,juz:29},
+  {n:73,name:"Al-Muzzammil",arabic:"المزمل",ayahs:20,juz:29},
+  {n:74,name:"Al-Muddaththir",arabic:"المدثر",ayahs:56,juz:29},
+  {n:75,name:"Al-Qiyamah",arabic:"القيامة",ayahs:40,juz:29},
+  {n:76,name:"Al-Insan",arabic:"الإنسان",ayahs:31,juz:29},
+  {n:77,name:"Al-Mursalat",arabic:"المرسلات",ayahs:50,juz:29},
+  {n:78,name:"An-Naba",arabic:"النبأ",ayahs:40,juz:30},
+  {n:79,name:"An-Naziat",arabic:"النازعات",ayahs:46,juz:30},
+  {n:80,name:"Abasa",arabic:"عبس",ayahs:42,juz:30},
+  {n:81,name:"At-Takwir",arabic:"التكوير",ayahs:29,juz:30},
+  {n:82,name:"Al-Infitar",arabic:"الانفطار",ayahs:19,juz:30},
+  {n:83,name:"Al-Mutaffifin",arabic:"المطففين",ayahs:36,juz:30},
+  {n:84,name:"Al-Inshiqaq",arabic:"الانشقاق",ayahs:25,juz:30},
+  {n:85,name:"Al-Buruj",arabic:"البروج",ayahs:22,juz:30},
+  {n:86,name:"At-Tariq",arabic:"الطارق",ayahs:17,juz:30},
+  {n:87,name:"Al-Ala",arabic:"الأعلى",ayahs:19,juz:30},
+  {n:88,name:"Al-Ghashiyah",arabic:"الغاشية",ayahs:26,juz:30},
+  {n:89,name:"Al-Fajr",arabic:"الفجر",ayahs:30,juz:30},
+  {n:90,name:"Al-Balad",arabic:"البلد",ayahs:20,juz:30},
+  {n:91,name:"Ash-Shams",arabic:"الشمس",ayahs:15,juz:30},
+  {n:92,name:"Al-Layl",arabic:"الليل",ayahs:21,juz:30},
+  {n:93,name:"Ad-Duha",arabic:"الضحى",ayahs:11,juz:30},
+  {n:94,name:"Ash-Sharh",arabic:"الشرح",ayahs:8,juz:30},
+  {n:95,name:"At-Tin",arabic:"التين",ayahs:8,juz:30},
+  {n:96,name:"Al-Alaq",arabic:"العلق",ayahs:19,juz:30},
+  {n:97,name:"Al-Qadr",arabic:"القدر",ayahs:5,juz:30},
+  {n:98,name:"Al-Bayyinah",arabic:"البينة",ayahs:8,juz:30},
+  {n:99,name:"Az-Zalzalah",arabic:"الزلزلة",ayahs:8,juz:30},
+  {n:100,name:"Al-Adiyat",arabic:"العاديات",ayahs:11,juz:30},
+  {n:101,name:"Al-Qariah",arabic:"القارعة",ayahs:11,juz:30},
+  {n:102,name:"At-Takathur",arabic:"التكاثر",ayahs:8,juz:30},
+  {n:103,name:"Al-Asr",arabic:"العصر",ayahs:3,juz:30},
+  {n:104,name:"Al-Humazah",arabic:"الهمزة",ayahs:9,juz:30},
+  {n:105,name:"Al-Fil",arabic:"الفيل",ayahs:5,juz:30},
+  {n:106,name:"Quraysh",arabic:"قريش",ayahs:4,juz:30},
+  {n:107,name:"Al-Maun",arabic:"الماعون",ayahs:7,juz:30},
+  {n:108,name:"Al-Kawthar",arabic:"الكوثر",ayahs:3,juz:30},
+  {n:109,name:"Al-Kafirun",arabic:"الكافرون",ayahs:6,juz:30},
+  {n:110,name:"An-Nasr",arabic:"النصر",ayahs:3,juz:30},
+  {n:111,name:"Al-Masad",arabic:"المسد",ayahs:5,juz:30},
+  {n:112,name:"Al-Ikhlas",arabic:"الإخلاص",ayahs:4,juz:30},
+  {n:113,name:"Al-Falaq",arabic:"الفلق",ayahs:5,juz:30},
+  {n:114,name:"An-Nas",arabic:"الناس",ayahs:6,juz:30}
+];
+
+const TOTAL_AYAHS = 6236;
+
+// Exact Juz boundaries — all 6236 ayahs (verified)
+const JUZ_AYAH_MAP = {
+  1:[[1,1,7],[2,1,141]],
+  2:[[2,142,252]],
+  3:[[2,253,286],[3,1,92]],
+  4:[[3,93,200],[4,1,23]],
+  5:[[4,24,147]],
+  6:[[4,148,176],[5,1,81]],
+  7:[[5,82,120],[6,1,110]],
+  8:[[6,111,165],[7,1,87]],
+  9:[[7,88,206],[8,1,40]],
+  10:[[8,41,75],[9,1,92]],
+  11:[[9,93,129],[10,1,109],[11,1,5]],
+  12:[[11,6,123],[12,1,52]],
+  13:[[12,53,111],[13,1,43],[14,1,52],[15,1,1]],
+  14:[[15,2,99],[16,1,128]],
+  15:[[17,1,111],[18,1,74]],
+  16:[[18,75,110],[19,1,98],[20,1,135]],
+  17:[[21,1,112],[22,1,78]],
+  18:[[23,1,118],[24,1,64],[25,1,20]],
+  19:[[25,21,77],[26,1,227],[27,1,55]],
+  20:[[27,56,93],[28,1,88],[29,1,45]],
+  21:[[29,46,69],[30,1,60],[31,1,34],[32,1,30],[33,1,30]],
+  22:[[33,31,73],[34,1,54],[35,1,45],[36,1,27]],
+  23:[[36,28,83],[37,1,182],[38,1,88],[39,1,31]],
+  24:[[39,32,75],[40,1,85],[41,1,46]],
+  25:[[41,47,54],[42,1,53],[43,1,89],[44,1,59],[45,1,37]],
+  26:[[46,1,35],[47,1,38],[48,1,29],[49,1,18],[50,1,45],[51,1,30]],
+  27:[[51,31,60],[52,1,49],[53,1,62],[54,1,55],[55,1,78],[56,1,96],[57,1,29]],
+  28:[[58,1,22],[59,1,24],[60,1,13],[61,1,14],[62,1,11],[63,1,11],[64,1,18],[65,1,12],[66,1,12]],
+  29:[[67,1,30],[68,1,52],[69,1,52],[70,1,44],[71,1,28],[72,1,28],[73,1,20],[74,1,56],[75,1,40],[76,1,31],[77,1,50]],
+  30:[[78,1,40],[79,1,46],[80,1,42],[81,1,29],[82,1,19],[83,1,36],[84,1,25],[85,1,22],[86,1,17],[87,1,19],[88,1,26],[89,1,30],[90,1,20],[91,1,15],[92,1,21],[93,1,11],[94,1,8],[95,1,8],[96,1,19],[97,1,5],[98,1,8],[99,1,8],[100,1,11],[101,1,11],[102,1,8],[103,1,3],[104,1,9],[105,1,5],[106,1,4],[107,1,7],[108,1,3],[109,1,6],[110,1,3],[111,1,5],[112,1,4],[113,1,5],[114,1,6]],
+};
+
+// Reverse map: surahN → [{juz, from, to, totalInSpan}]
+const SURAH_JUZ_RANGES = {};
+for (const [juzN, spans] of Object.entries(JUZ_AYAH_MAP)) {
+  for (const [surahN, fromA, toA] of spans) {
+    if (!SURAH_JUZ_RANGES[surahN]) SURAH_JUZ_RANGES[surahN] = [];
+    SURAH_JUZ_RANGES[surahN].push({juz:parseInt(juzN), from:fromA, to:toA});
+  }
+}
+
+// Juz data (30 juz with 4 quarter segments each)
+const RUKU_PER_JUZ = [8,16,20,16,16,18,20,18,18,18,18,18,16,16,17,16,12,16,18,18,18,14,18,16,16,18,16,18,18,14];
+
+// Generate Rub (quarter) segments for a juz
+function getRubSegments(n) {
+  return [
+    {id:`${n}_rub_1`, label:"Rub' 1 (1st Quarter)", arabic:'الربع الأول', pages:5, segType:'rub', num:1},
+    {id:`${n}_rub_2`, label:"Rub' 2 (2nd Quarter)", arabic:'الربع الثاني', pages:5, segType:'rub', num:2},
+    {id:`${n}_rub_3`, label:"Rub' 3 (3rd Quarter)", arabic:'الربع الثالث', pages:5, segType:'rub', num:3},
+    {id:`${n}_rub_4`, label:"Rub' 4 (4th Quarter)", arabic:'الربع الرابع', pages:5, segType:'rub', num:4},
+  ];
+}
+
+// Generate Ruku segments for a juz
+function getRukuSegments(n) {
+  const count = RUKU_PER_JUZ[n-1];
+  const pagesEach = +(20/count).toFixed(1);
+  return Array.from({length:count}, (_,i) => ({
+    id:`${n}_ruku_${i+1}`,
+    label:`Ruku ${i+1}`,
+    arabic:`ركوع ${i+1}`,
+    pages: pagesEach,
+    segType:'ruku',
+    num: i+1
+  }));
+}
+
+const JUZ_DATA = Array.from({length:30}, (_,i) => {
+  const n = i+1;
+  return {n, name:`Juz ${n}`, rubSegments: getRubSegments(n), rukuSegments: getRukuSegments(n)};
+});
+
+// Current segment mode: rub | ruku
+let currentSegMode = 'rub';
+
+const COLORS = ['#d4a843','#3fb950','#388bfd','#e74c3c','#9b59b6','#1abc9c','#e67e22','#e91e63'];
+const avatarColor = n => COLORS[(n||'').charCodeAt(0)%COLORS.length];
+const initials = n => (n||'??').slice(0,2).toUpperCase();
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+const LS_KEY = 'quranTracker_v3';
+let state = {users:[], currentUser:null, logs:[]};
+
+function loadState() {
+  try { const s=localStorage.getItem(LS_KEY); if(s) state=JSON.parse(s); } catch(e){}
+}
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+// ════════════════════════════════════════════════
+// FIREBASE
+// ════════════════════════════════════════════════
+async function fbPushLog(l) {
+  if (!window._fbOK) return;
+  try {
+    const {db, collection, addDoc} = window._fb;
+    await addDoc(collection(db,'logs'), {...l, _dev: location.hostname});
+  } catch(e) { console.warn('FB push:', e.message); }
+}
+
+// IDs we've deleted locally — never re-import from Firebase
+function getDeletedIds() {
+  try { return new Set(JSON.parse(localStorage.getItem('qt_deleted_ids')||'[]')); } catch(e){ return new Set(); }
+}
+function addDeletedId(id) {
+  if (!id) return;
+  const set = getDeletedIds();
+  set.add(id);
+  // Keep max 500 deleted IDs to avoid unbounded growth
+  const arr = [...set].slice(-500);
+  localStorage.setItem('qt_deleted_ids', JSON.stringify(arr));
+}
+
+function fbStartSync() {
+  if (!window._fbOK) return;
+  const {db, collection, query, orderBy, onSnapshot} = window._fb;
+  const q = query(collection(db,'logs'), orderBy('date','desc'));
+  onSnapshot(q, snap => {
+    const deletedIds = getDeletedIds();
+    const remote = snap.docs.map(d => ({...d.data(), _fbId: d.id}));
+    let changed = false;
+    remote.forEach(r => {
+      if (!r.id) r.id = r._fbId;
+      // Skip anything in our deleted blocklist
+      if (deletedIds.has(r.id) || deletedIds.has(r._fbId)) return;
+      const exists = state.logs.some(l => (l.id && l.id===r.id) || (l._fbId && l._fbId===r._fbId));
+      if (!exists) {
+        state.logs.push(r);
+        changed = true;
+      } else {
+        // Backfill _fbId on existing local log
+        const local = state.logs.find(l => l.id===r.id);
+        if (local && !local._fbId) { local._fbId = r._fbId; changed = true; }
+      }
+    });
+    if (changed) { saveState(); renderAll(); renderUserModal(); updateHeader(); }
+    setSyncStatus(true);
+  }, err => { console.warn('FB sync:', err); setSyncStatus(false); });
+}
+
+function setSyncStatus(ok) {
+  const dot = document.getElementById('headerSyncDot');
+  const dot2 = document.getElementById('syncStatusDot');
+  const txt = document.getElementById('syncStatusText');
+  if (dot) { dot.className = 'sync-indicator' + (ok ? ' live' : ''); }
+  if (dot2) { dot2.style.background = ok ? 'var(--green)' : '#e74c3c'; }
+  if (txt) { txt.textContent = ok ? 'Connected — live sync active' : 'Offline — using local data'; }
+}
+
+// ════════════════════════════════════════════════
+// CORE TRACKING ENGINE
+// ════════════════════════════════════════════════
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function weekAgoStr() {
+  const d = new Date(); d.setDate(d.getDate()-7);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getMyLogs(user) { return state.logs.filter(l=>l.user===(user||state.currentUser)); }
+
+// ── SURAH TRACKING ──
+// Returns max ayah read in a surah from SURAH-type logs only
+function getMaxAyahFromSurahLogs(surahN, user) {
+  const me = user || state.currentUser;
+  const logs = getMyLogs(me).filter(l => l.type==='surah' && l.surahN===surahN);
+  return logs.length ? Math.max(...logs.map(l => l.toAyah)) : 0;
+}
+
+// ── JUZ TRACKING ──
+// Returns Set of segment IDs read from JUZ-type logs only
+function getSegmentsFromJuzLogs(user) {
+  const me = user || state.currentUser;
+  const set = new Set();
+  getMyLogs(me).filter(l => l.type==='juz').forEach(l => (l.segments||[]).forEach(s => set.add(s)));
+  return set;
+}
+
+// Get active segments for a juz based on current mode
+function getActiveSegments(juzN) {
+  const juz = JUZ_DATA[juzN-1];
+  return currentSegMode === 'ruku' ? juz.rukuSegments : juz.rubSegments;
+}
+
+// Switch between Rub and Ruku mode, refresh the appropriate checkboxes
+function setSegMode(mode, form) {
+  currentSegMode = mode;
+  // Update button states
+  if (form === 'quick' || form === 'both') {
+    const rb = document.getElementById('qSegRubBtn');
+    const rk = document.getElementById('qSegRukuBtn');
+    if (rb) { rb.className  = mode==='rub'  ? 'btn btn-gold'    : 'btn btn-outline'; rb.style.fontWeight='600'; }
+    if (rk) { rk.className  = mode==='ruku' ? 'btn btn-gold'    : 'btn btn-outline'; rk.style.fontWeight='600'; }
+    updateQuickSegments();
+  }
+  if (form === 'modal' || form === 'both') {
+    const mb = document.getElementById('mSegRubBtn');
+    const mk = document.getElementById('mSegRukuBtn');
+    if (mb) { mb.className  = mode==='rub'  ? 'btn btn-gold'    : 'btn btn-outline'; mb.style.fontWeight='600'; }
+    if (mk) { mk.className  = mode==='ruku' ? 'btn btn-gold'    : 'btn btn-outline'; mk.style.fontWeight='600'; }
+    updateSegments();
+  }
+}
+
+// ── BIDIRECTIONAL: how many ayahs of a given Juz has user read (from ALL log types) ──
+function getReadAyahsInJuz(juzN, user) {
+  const me = user || state.currentUser;
+  const spans = JUZ_AYAH_MAP[juzN];
+  const totalAyahsInJuz = spans.reduce((a,[s,f,t]) => a+(t-f+1), 0);
+
+  // 1. Count from SURAH logs — precise ayah ranges
+  let fromSurah = 0;
+  for (const [surahN, juzFrom, juzTo] of spans) {
+    const maxRead = getMaxAyahFromSurahLogs(surahN, me);
+    if (maxRead >= juzFrom) {
+      fromSurah += Math.min(maxRead, juzTo) - juzFrom + 1;
+    }
+  }
+
+  // 2. Count from JUZ logs — each segment = 25% of juz
+  let fromJuz = 0;
+  const segs = getSegmentsFromJuzLogs(me);
+  for (let q=1; q<=4; q++) {
+    if (segs.has(`${juzN}_${q}`)) fromJuz += Math.round(totalAyahsInJuz / 4);
+  }
+
+  // Take the MAX (never double count)
+  return {read: Math.max(fromSurah, fromJuz), total: totalAyahsInJuz};
+}
+
+// ── BIDIRECTIONAL: what ayahs of a surah are covered from ALL log types ──
+function getMaxAyahRead(surahN, user) {
+  const me = user || state.currentUser;
+
+  // From surah logs — exact
+  let maxFromSurah = getMaxAyahFromSurahLogs(surahN, me);
+
+  // From juz logs — if a segment covers this surah's ayahs in a juz, count those
+  const surahRanges = SURAH_JUZ_RANGES[surahN] || [];
+  const segs = getSegmentsFromJuzLogs(me);
+  let maxFromJuz = 0;
+
+  for (const {juz: juzN, from: juzFrom, to: juzTo} of surahRanges) {
+    const spans = JUZ_AYAH_MAP[juzN];
+    const totalAyahsInJuz = spans.reduce((a,[s,f,t]) => a+(t-f+1), 0);
+    const ayahsPerSeg = Math.round(totalAyahsInJuz / 4);
+
+    // Figure out which ayah-offset within the juz corresponds to juzFrom/juzTo
+    let offsetStart = 0;
+    for (const [sn, sf, st] of spans) {
+      if (sn === surahN) break;
+      offsetStart += st - sf + 1;
+    }
+    // offsetStart = number of ayahs in this juz BEFORE this surah span
+
+    // For each segment, calculate which ayahs of THIS SURAH it covers
+    for (let q=1; q<=4; q++) {
+      if (!segs.has(`${juzN}_${q}`)) continue;
+      const segStart = ayahsPerSeg * (q-1); // start offset in juz
+      const segEnd   = ayahsPerSeg * q - 1; // end offset in juz
+
+      // The surah span occupies [offsetStart, offsetStart + (juzTo-juzFrom)] in juz
+      const surahSpanStart = offsetStart;
+      const surahSpanEnd   = offsetStart + (juzTo - juzFrom);
+
+      // Overlap between segment and surah span
+      const overlapStart = Math.max(segStart, surahSpanStart);
+      const overlapEnd   = Math.min(segEnd,   surahSpanEnd);
+      if (overlapEnd >= overlapStart) {
+        // This segment covers some ayahs of this surah
+        // The last ayah of this surah covered = juzFrom + (overlapEnd - surahSpanStart)
+        const lastAyahCovered = juzFrom + (overlapEnd - surahSpanStart);
+        maxFromJuz = Math.max(maxFromJuz, lastAyahCovered);
+      }
+    }
+  }
+
+  return Math.max(maxFromSurah, maxFromJuz);
+}
+
+// ── SEGMENT READ STATUS: which juz segments are covered by ALL log types ──
+function getReadSegments(user) {
+  const me = user || state.currentUser;
+  const set = new Set();
+
+  // Direct juz logs — always trust what user explicitly marked
+  getSegmentsFromJuzLogs(me).forEach(s => {
+    set.add(s);
+    // Migrate old format "N_Q" → "N_rub_Q" for backward compat
+    const oldFmt = s.match(/^(\d+)_(\d)$/);
+    if (oldFmt) set.add(`${oldFmt[1]}_rub_${oldFmt[2]}`);
+  });
+
+  // From surah logs: check each segment independently based on its actual ayah range
+  for (let juzN=1; juzN<=30; juzN++) {
+    const spans = JUZ_AYAH_MAP[juzN];
+    const totalAyahsInJuz = spans.reduce((a,[s,f,t]) => a+(t-f+1), 0);
+    const ayahsPerSeg = Math.round(totalAyahsInJuz / 4);
+
+    for (let q=1; q<=4; q++) {
+      // Check both old format "N_Q" and new format "N_rub_Q"
+      if (set.has(`${juzN}_${q}`) || set.has(`${juzN}_rub_${q}`)) continue; // already marked from juz log
+
+      // This segment covers ayah offsets [segStart, segEnd] within the juz
+      const segStartOffset = ayahsPerSeg * (q-1);
+      const segEndOffset   = (q===4) ? totalAyahsInJuz-1 : ayahsPerSeg*q - 1;
+
+      // Count how many ayahs of THIS segment are covered by surah logs
+      let coveredInSeg = 0;
+      let juzOffset = 0;
+      for (const [surahN, juzFrom, juzTo] of spans) {
+        const spanLen = juzTo - juzFrom + 1;
+        const spanStart = juzOffset;
+        const spanEnd   = juzOffset + spanLen - 1;
+
+        // Overlap between this surah span and this segment
+        const overlapStart = Math.max(spanStart, segStartOffset);
+        const overlapEnd   = Math.min(spanEnd,   segEndOffset);
+        if (overlapEnd >= overlapStart) {
+          // How many of these overlapping ayahs has user read?
+          const maxRead = getMaxAyahFromSurahLogs(surahN, me);
+          // The overlap in surah-ayah terms: surah ayah = juzFrom + (offset - juzOffset)
+          const surahOverlapFrom = juzFrom + (overlapStart - juzOffset);
+          const surahOverlapTo   = juzFrom + (overlapEnd   - juzOffset);
+          if (maxRead >= surahOverlapTo) {
+            coveredInSeg += overlapEnd - overlapStart + 1;
+          } else if (maxRead >= surahOverlapFrom) {
+            coveredInSeg += maxRead - surahOverlapFrom + 1;
+          }
+        }
+        juzOffset += spanLen;
+      }
+
+      // Mark segment as read if ≥80% of it is covered (allows slight boundary differences)
+      const segLen = segEndOffset - segStartOffset + 1;
+      if (coveredInSeg >= segLen * 0.8) { set.add(`${juzN}_${q}`); set.add(`${juzN}_rub_${q}`); }
+    }
+  }
+
+  return set;
+}
+
+// ── COMPLETION ──
+function getJuzCompletion(user) {
+  const me = user || state.currentUser;
+  const result = {};
+  for (let juzN=1; juzN<=30; juzN++) {
+    const {read, total} = getReadAyahsInJuz(juzN, me);
+    result[juzN] = Math.min(100, Math.round(read / total * 100));
+  }
+  return result;
+}
+
+function getUniqueAyahs(user) {
+  const me = user || state.currentUser;
+  // Per-surah high-watermark (accounts for both juz and surah logs via getMaxAyahRead)
+  return Math.min(TOTAL_AYAHS, SURAHS.reduce((total, s) => total + getMaxAyahRead(s.n, me), 0));
+}
+
+function getNextAyah(surahN) {
+  const maxRead = getMaxAyahRead(surahN);
+  const s = SURAHS[surahN-1];
+  if (maxRead >= s.ayahs) return s.ayahs; // fully read — stay at end
+  return maxRead + 1;
+}
+
+function getStreak(user) {
+  const me = user || state.currentUser;
+  const days = new Set(getMyLogs(me).map(l => l.date));
+  let streak = 0;
+  const d = new Date();
+  for (;;) {
+    const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if (days.has(ds)) { streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  return streak;
+}
+
+// ════════════════════════════════════════════════
+// USER MANAGEMENT
+// ════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function renderUserModal() {
+  const allUsers = [...new Set(state.logs.map(l=>l.user).concat(state.users))].filter(Boolean);
+  state.users = allUsers;
+  const ul = document.getElementById('userList');
+  const chips = document.getElementById('userChips');
+  if (!ul) return;
+  ul.innerHTML = allUsers.length ? allUsers.map(u => `
+    <div class="lb-row" style="cursor:pointer;" onclick="selectUser('${sanitize(u)}')">
+      <div class="lb-avatar" style="background:${avatarColor(u)};color:#000;">${initials(u)}</div>
+      <div class="lb-info">
+        <div class="lb-name">${sanitize(u)}</div>
+        <div class="lb-detail">${getMyLogs(u).length} logs · ${getUniqueAyahs(u).toLocaleString()} ayahs read</div>
+      </div>
+      ${state.currentUser===u?'<span class="badge">Active</span>':''}
+    </div>`).join('')
+  : '<div style="color:var(--muted);font-size:13px;">No users yet. Add one below!</div>';
+
+  if (chips) chips.innerHTML = allUsers.map(u =>
+    `<div class="chip">
+      <div class="lb-avatar" style="background:${avatarColor(u)};color:#000;width:18px;height:18px;font-size:9px;">${initials(u)}</div>
+      ${sanitize(u)}
+    </div>`).join('');
+}
+
+function addUser() {
+  const inp = document.getElementById('newUserInput');
+  const name = sanitize(inp.value.trim());
+  if (!name) return;
+  if (state.users.includes(name)) { showNotify('Name already exists'); return; }
+  state.users.push(name);
+  if (!state.currentUser) selectUser(name);
+  saveState(); inp.value = ''; renderUserModal();
+}
+
+function selectUser(name) {
+  state.currentUser = name;
+  saveState();
+  closeModal('userModal');
+  updateHeader();
+  renderAll();
+  showNotify(`Welcome back, ${name}! 🌙`);
+}
+
+function updateHeader() {
+  const av = document.getElementById('headerAvatar');
+  const nm = document.getElementById('headerName');
+  if (state.currentUser) {
+    av.style.background = avatarColor(state.currentUser);
+    av.style.color = '#000';
+    av.textContent = initials(state.currentUser);
+    nm.textContent = state.currentUser;
+  } else {
+    av.textContent = '?'; av.style.background = '#666'; nm.textContent = 'Select User';
+  }
+}
+
+function showNotify(msg) {
+  const n = document.getElementById('notify');
+  n.textContent = msg; n.style.display = 'block';
+  clearTimeout(window._nt);
+  window._nt = setTimeout(() => n.style.display='none', 2800);
+}
+
+// ════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════
+function switchTab(id) {
+  if (id==='admin' && !adminLoggedIn) { openAdminLogin(); return; }
+  const ids = ['dashboard','log','progress','leaderboard','settings','admin'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ids[i]===id));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if (pg) pg.classList.add('active');
+  if (id==='leaderboard') renderLeaderboard();
+  if (id==='progress')    renderProgressPage();
+  if (id==='log')         renderRecentLogs();
+  if (id==='admin')       renderAdminPanel();
+}
+
+// ════════════════════════════════════════════════
+// FORM POPULATION
+// ════════════════════════════════════════════════
+function populateSelects() {
+  const juzOpts = JUZ_DATA.map(j => `<option value="${j.n}">${j.n}. ${j.name}</option>`).join('');
+  const surahOpts = SURAHS.map(s => `<option value="${s.n}">${s.n}. ${s.name} (${s.arabic}) — ${s.ayahs} ayahs</option>`).join('');
+  ['logJuzSelect','quickJuzSel'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=juzOpts; });
+  ['logSurahSelect','quickSurahSel'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=surahOpts; });
+}
+
+// ── SEGMENT CHECKBOXES — greyed if already read (from any log type) ──
+function getSegChecks(juzN, containerId) {
+  const juz = JUZ_DATA[juzN-1];
+  const readSegs = getReadSegments(state.currentUser);
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = juz.segments.map(s => {
+    const done = readSegs.has(s.id);
+    let html = '<div class="seg-row' + (done?' seg-done':'') + '" ';
+    html += done
+      ? 'style="opacity:.5;cursor:not-allowed;"'
+      : 'onclick="toggleSeg(\'' + s.id + '\',\'' + containerId + '\')" style="cursor:pointer;"';
+    html += '>';
+    html += '<input type="checkbox" id="seg_' + s.id + '" ' + (done?'checked disabled':'') + ' onclick="event.stopPropagation();"/>';
+    html += '<div class="seg-info">';
+    html += '<div class="seg-name">' + s.label + (done?' <span style="color:var(--green);font-size:11px;">✓ Already read</span>':'') + '</div>';
+    html += '<div class="seg-sub arabic" style="font-size:13px;">' + s.arabic + ' · ~' + s.pages + ' pages</div>';
+    html += '</div></div>';
+    return html;
+  }).join('');
+}
+
+function toggleSeg(id, containerId) {
+  const cb = document.getElementById('seg_' + id);
+  if (cb && !cb.disabled) cb.checked = !cb.checked;
+}
+
+function updateSegments()       { const n=parseInt(document.getElementById('logJuzSelect').value); getSegChecks(n,'segmentChecks'); }
+function updateQuickSegments()  { const n=parseInt(document.getElementById('quickJuzSel').value);  getSegChecks(n,'quickSegChecks'); }
+
+// ── AYAH RANGE — auto-jump to next unread ──
+function updateAyahRange() {
+  const n = parseInt(document.getElementById('logSurahSelect').value);
+  const s = SURAHS[n-1];
+  const next = getNextAyah(n);
+  const fromEl = document.getElementById('fromAyah');
+  const toEl   = document.getElementById('toAyah');
+  fromEl.value = next; fromEl.max = s.ayahs;
+  toEl.value   = s.ayahs; toEl.max = s.ayahs;
+  updateSurahProgress('surahProgress', n);
+  const hint = document.getElementById('surahContinueHint');
+  if (hint) {
+    const maxRead = getMaxAyahRead(n);
+    hint.innerHTML = maxRead > 0 && maxRead < s.ayahs
+      ? '<div style="background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px;">📌 Last read: Ayah <strong>' + maxRead + '</strong> — continuing from <strong>' + next + '</strong></div>'
+      : maxRead >= s.ayahs
+      ? '<div style="background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px;">✅ Surah fully read!</div>'
+      : '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Starting fresh from Ayah 1</div>';
+  }
+}
+
+function updateQuickAyah() {
+  const n = parseInt(document.getElementById('quickSurahSel').value);
+  const s = SURAHS[n-1];
+  const next = getNextAyah(n);
+  document.getElementById('quickFrom').value = next;
+  document.getElementById('quickFrom').max   = s.ayahs;
+  document.getElementById('quickTo').value   = s.ayahs;
+  document.getElementById('quickTo').max     = s.ayahs;
+  updateSurahProgress('quickSurahProg', n);
+  const hint = document.getElementById('quickSurahHint');
+  if (hint) {
+    const maxRead = getMaxAyahRead(n);
+    hint.innerHTML = maxRead > 0 && maxRead < s.ayahs
+      ? '<div style="background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:8px;padding:8px 12px;font-size:12px;">📌 Last read: Ayah <strong>' + maxRead + '</strong> — continuing from <strong>' + next + '</strong></div>'
+      : maxRead >= s.ayahs
+      ? '<div style="background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);border-radius:8px;padding:8px 12px;font-size:12px;">✅ Surah fully read!</div>'
+      : '<div style="font-size:12px;color:var(--muted);">Starting fresh from Ayah 1</div>';
+  }
+}
+
+function updateSurahProgress(containerId, surahN) {
+  const s = SURAHS[surahN-1];
+  const maxRead = getMaxAyahRead(surahN);
+  const pct = Math.round(maxRead / s.ayahs * 100);
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '<div class="progress-wrap">'
+    + '<div class="progress-label"><span>' + s.name + ' progress</span><span>' + maxRead + '/' + s.ayahs + ' (' + pct + '%)</span></div>'
+    + '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>'
+    + '</div>';
+}
+
+function updateLogForm() {
+  const v = document.getElementById('logBySelect').value;
+  document.getElementById('juzLogForm').style.display  = v==='juz'   ? '' : 'none';
+  document.getElementById('surahLogForm').style.display = v==='surah' ? '' : 'none';
+  if (v==='juz')   updateSegments();
+  if (v==='surah') updateAyahRange();
+}
+
+function updateQuickForm() {
+  const v = document.getElementById('quickLogBy').value;
+  document.getElementById('quickJuzForm').style.display   = v==='juz'   ? '' : 'none';
+  document.getElementById('quickSurahForm').style.display = v==='surah' ? '' : 'none';
+  if (v==='juz')   updateQuickSegments();
+  if (v==='surah') updateQuickAyah();
+}
+
+// ════════════════════════════════════════════════
+// SUBMIT LOG
+// ════════════════════════════════════════════════
+function submitLog() {
+  if (!state.currentUser) { showNotify('Select a user first!'); openModal('userModal'); return; }
+  const by = document.getElementById('logBySelect').value;
+  let l = {id: Date.now()+'_'+Math.random(), user: state.currentUser, type: by,
+            date: todayStr(), note: sanitize(document.getElementById('logNote').value.trim())};
+  if (by === 'juz') {
+    const juzN = parseInt(document.getElementById('logJuzSelect').value);
+    const checked = [...document.querySelectorAll('#segmentChecks input[type=checkbox]:checked:not(:disabled)')].map(c => c.id.replace('seg_',''));
+    if (!checked.length) { showNotify('Select at least one segment!'); return; }
+    // Double-check against already-read (catches juz segments covered by surah logs)
+    const alreadyRead = getReadSegments(state.currentUser);
+    const newSegs = checked.filter(s => !alreadyRead.has(s));
+    if (!newSegs.length) { showNotify('These segments are already covered by your Surah logs!'); return; }
+    const isRukuM = currentSegMode === 'ruku';
+    const pagesEachM = isRukuM ? +(20/RUKU_PER_JUZ[juzN-1]).toFixed(1) : 5;
+    l.juzN = juzN; l.segments = newSegs; l.segMode = currentSegMode;
+    l.pages = +(newSegs.length * pagesEachM).toFixed(1); l.ayahs = Math.round(newSegs.length * (isRukuM ? (6236/558) : 50));
+  } else {
+    const surahN = parseInt(document.getElementById('logSurahSelect').value);
+    const from   = parseInt(document.getElementById('fromAyah').value);
+    const to     = parseInt(document.getElementById('toAyah').value);
+    if (from > to) { showNotify('From ayah must be ≤ To ayah'); return; }
+    const s = SURAHS[surahN-1];
+    if (to > s.ayahs) { showNotify('Max ayah for this surah is ' + s.ayahs); return; }
+    const maxRead = getMaxAyahRead(surahN);
+    const newAyahs = Math.max(0, to - Math.max(from-1, maxRead));
+    if (newAyahs === 0) { showNotify('These ayahs are already logged!'); return; }
+    l.surahN = surahN; l.fromAyah = from; l.toAyah = to; l.ayahs = to-from+1; l.pages = Math.ceil(l.ayahs/10);
+  }
+  state.logs.push(l); saveState(); fbPushLog(l);
+  closeModal('logModal');
+  showNotify('✅ Reading logged! Jazakallah khayran 🌙');
+  renderAll();
+}
+
+function submitQuickLog() {
+  if (!state.currentUser) { showNotify('Select a user first!'); openModal('userModal'); return; }
+  const by = document.getElementById('quickLogBy').value;
+  let l = {id: Date.now()+'_'+Math.random(), user: state.currentUser, type: by,
+            date: todayStr(), note: sanitize(document.getElementById('quickNote').value.trim())};
+  if (by === 'juz') {
+    const juzN = parseInt(document.getElementById('quickJuzSel').value);
+    const checked = [...document.querySelectorAll('#quickSegChecks input[type=checkbox]:checked:not(:disabled)')].map(c => c.id.replace('seg_',''));
+    if (!checked.length) { showNotify('Select at least one segment!'); return; }
+    const alreadyRead = getReadSegments(state.currentUser);
+    const newSegs = checked.filter(s => !alreadyRead.has(s));
+    if (!newSegs.length) { showNotify('These segments already covered by Surah logs!'); return; }
+    const isRuku = currentSegMode === 'ruku';
+    const pagesEach = isRuku ? +(20/RUKU_PER_JUZ[juzN-1]).toFixed(1) : 5;
+    l.juzN = juzN; l.segments = newSegs; l.segMode = currentSegMode;
+    l.pages = +(newSegs.length * pagesEach).toFixed(1); l.ayahs = Math.round(newSegs.length * (isRuku ? (6236/558) : 50));
+  } else {
+    const surahN = parseInt(document.getElementById('quickSurahSel').value);
+    const from   = parseInt(document.getElementById('quickFrom').value);
+    const to     = parseInt(document.getElementById('quickTo').value);
+    if (from > to) { showNotify('From ayah must be ≤ To ayah'); return; }
+    const s = SURAHS[surahN-1];
+    if (to > s.ayahs) { showNotify('Max ayah: ' + s.ayahs); return; }
+    const maxRead = getMaxAyahRead(surahN);
+    const newAyahs = Math.max(0, to - Math.max(from-1, maxRead));
+    if (newAyahs === 0) { showNotify('These ayahs are already logged!'); return; }
+    l.surahN = surahN; l.fromAyah = from; l.toAyah = to; l.ayahs = to-from+1; l.pages = Math.ceil(l.ayahs/10);
+  }
+  state.logs.push(l); saveState(); fbPushLog(l);
+  document.getElementById('quickNote').value = '';
+  showNotify('✅ Reading logged! 🌙');
+  renderAll();
+  updateQuickForm();
+}
+
+// ════════════════════════════════════════════════
+// EDIT / DELETE OWN LOGS
+// ════════════════════════════════════════════════
+let _editingLogId = null;
+
+function renderRecentLogs() {
+  const div = document.getElementById('recentLogs');
+  const logs = state.logs.slice().reverse().slice(0,30);
+  if (!logs.length) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">No readings logged yet.</div></div>';
+    return;
+  }
+  div.innerHTML = logs.map(l => {
+    const desc = l.type==='juz'
+      ? (()=>{
+        const segs = l.segments||[];
+        const isRuku = l.segMode==='ruku' || (segs.length && segs[0].includes('ruku'));
+        const segNames = segs.map(s=>{
+          const rukuM = s.match(/\d+_ruku_(\d+)/);
+          const rubM  = s.match(/\d+_rub_(\d+)/);
+          const oldM  = s.match(/^\d+_(\d)$/);
+          if (rukuM) return 'Ruku ' + rukuM[1];
+          if (rubM)  return "Rub' " + rubM[1];
+          if (oldM)  return "Rub' " + oldM[1];
+          return s;
+        });
+        const typeLabel = isRuku ? 'Ruku' : "Rub'";
+        return 'Juz ' + l.juzN + ' — ' + typeLabel + ' ' + segNames.join(', ') + ' (~' + l.pages + ' pages)';
+      })()
+      : ((SURAHS[l.surahN-1]?.name||'?') + ' — Ayah ' + l.fromAyah + '–' + l.toAyah + ' (' + l.ayahs + ' ayahs)');
+    const isMe = l.user === state.currentUser;
+    const logKey = l.id || l._fbId;
+    const editBtn = isMe
+      ? '<button class="btn btn-outline" style="padding:3px 8px;font-size:11px;margin-left:8px;flex-shrink:0;" onclick="openEditLog(\'' + logKey + '\')">✏️</button>'
+      : '';
+    return '<div class="log-item" style="align-items:center;">'
+      + '<div class="lb-avatar" style="background:' + avatarColor(l.user) + ';color:#000;width:30px;height:30px;font-size:11px;flex-shrink:0;">' + initials(l.user) + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div class="log-text"><strong>' + sanitize(l.user) + '</strong> — ' + desc + '</div>'
+        + '<div class="log-meta">' + l.date + (l.note?' · '+l.note:'') + '</div>'
+      + '</div>'
+      + editBtn
+      + '</div>';
+  }).join('');
+}
+
+function openEditLog(logId) {
+  const log = state.logs.find(l => l.id===logId || l._fbId===logId);
+  if (!log || log.user!==state.currentUser) { showNotify('Can only edit your own logs'); return; }
+  _editingLogId = logId;
+  const desc = log.type==='juz'
+    ? ('Juz ' + log.juzN + ' — ' + (log.segments||[]).length + ' quarters')
+    : ((SURAHS[log.surahN-1]?.name||'?') + ' Ayah ' + log.fromAyah + '–' + log.toAyah);
+  document.getElementById('editLogDetails').innerHTML = '<strong>' + sanitize(log.user) + '</strong> · ' + desc + ' · ' + log.date;
+  document.getElementById('editLogNote').value = log.note || '';
+  const ayahGroup = document.getElementById('editAyahGroup');
+  if (log.type==='surah') {
+    ayahGroup.style.display = '';
+    const s = SURAHS[log.surahN-1];
+    document.getElementById('editFromAyah').value = log.fromAyah;
+    document.getElementById('editFromAyah').max   = s.ayahs;
+    document.getElementById('editToAyah').value   = log.toAyah;
+    document.getElementById('editToAyah').max     = s.ayahs;
+  } else {
+    ayahGroup.style.display = 'none';
+  }
+  // Show delete only for today's logs
+  const delBtn = document.getElementById('editDeleteBtn');
+  const logDate = (log.date||'').split('T')[0].split(' ')[0];
+  if (delBtn) delBtn.style.display = logDate===todayStr() ? '' : 'none';
+  openModal('editLogModal');
+}
+
+function saveEditLog() {
+  const log = state.logs.find(l => l.id===_editingLogId || l._fbId===_editingLogId);
+  if (!log) return;
+  log.note = sanitize(document.getElementById('editLogNote').value.trim());
+  if (log.type==='surah') {
+    const from = parseInt(document.getElementById('editFromAyah').value);
+    const to   = parseInt(document.getElementById('editToAyah').value);
+    const s = SURAHS[log.surahN-1];
+    if (from > to) { showNotify('From must be ≤ To'); return; }
+    if (to > s.ayahs) { showNotify('Max ayah: ' + s.ayahs); return; }
+    log.fromAyah = from; log.toAyah = to; log.ayahs = to-from+1;
+  }
+  saveState();
+  closeModal('editLogModal');
+  renderRecentLogs();
+  renderAll();
+  showNotify('Log updated ✅');
+  _editingLogId = null;
+}
+
+async function deleteLog() {
+  const log = state.logs.find(l => l.id===_editingLogId || l._fbId===_editingLogId);
+  if (!log) return;
+  const logDate = (log.date||'').split('T')[0].split(' ')[0];
+  if (logDate !== todayStr()) { showNotify("Can only delete today's logs"); return; }
+
+  // 1. Add BOTH ids to blocklist FIRST — before any async ops
+  //    This prevents Firebase sync from restoring the log
+  addDeletedId(log.id);
+  addDeletedId(log._fbId);
+
+  // 2. Remove from local state
+  state.logs = state.logs.filter(l => l.id!==_editingLogId && l._fbId!==_editingLogId);
+  saveState();
+
+  // 3. Delete from Firebase — with retry if no _fbId yet (sync hasn't returned yet)
+  const doFbDelete = async (fbId) => {
+    if (!fbId || !window._fbOK) return;
+    try {
+      const {db, doc:fbDoc, deleteDoc} = window._fb;
+      await deleteDoc(fbDoc(db,'logs',fbId));
+    } catch(e) { console.warn('FB delete failed (blocked locally):', e.message); }
+  };
+
+  if (log._fbId) {
+    await doFbDelete(log._fbId);
+  } else {
+    // No _fbId yet — wait up to 5s for Firebase to assign one, then delete
+    let attempts = 0;
+    const waitAndDelete = setInterval(async () => {
+      attempts++;
+      // Try to find the Firebase doc by matching local id in a fresh query
+      if (window._fbOK) {
+        try {
+          const {db, collection, query, where, getDocs, deleteDoc, doc:fbDoc} = window._fb;
+          const q = query(collection(db,'logs'), where('id','==', log.id));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            clearInterval(waitAndDelete);
+            snap.docs.forEach(d => doFbDelete(d.id));
+          }
+        } catch(e) {}
+      }
+      if (attempts >= 10) clearInterval(waitAndDelete); // give up after 5s
+    }, 500);
+  }
+
+  closeModal('editLogModal');
+  renderRecentLogs();
+  renderAll();
+  showNotify('Log deleted 🗑');
+  _editingLogId = null;
+}
+
+// ════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════
+let weekChartInst = null;
+
+function renderDashboard() {
+  const me = state.currentUser;
+  const total = state.logs.reduce((a,l) => a+(l.pages||0), 0);
+  document.getElementById('statTotal').textContent = total;
+
+  if (me) {
+    const uniqueA = getUniqueAyahs(me);
+    const pct = Math.min(100, Math.round(uniqueA/TOTAL_AYAHS*100));
+    const todayLogs = getMyLogs(me).filter(l => l.date===todayStr());
+    const todayPages = todayLogs.reduce((a,l) => a+(l.pages||0), 0);
+    const sk = getStreak(me);
+
+    document.getElementById('statToday').textContent = todayPages;
+    document.getElementById('statTodaySub').textContent = todayPages>0 ? (todayLogs.length + ' logs today') : 'Not logged yet today';
+    document.getElementById('statPct').textContent = pct + '%';
+    document.getElementById('statAyahs').textContent = uniqueA.toLocaleString() + ' / ' + TOTAL_AYAHS.toLocaleString() + ' ayahs';
+    const sk2 = document.getElementById('statStreak');
+    if (sk2) sk2.textContent = '🔥 ' + sk + ' day streak';
+
+    // Today banner
+    const bnr = document.getElementById('todayBanner');
+    if (bnr) bnr.innerHTML = getMyLogs(me).some(l=>l.date===todayStr()) ? ''
+      : '<div style="background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;"><span style="font-size:24px;">🌅</span><div><div style="font-weight:600;">Have you read today?</div><div style="font-size:12px;color:var(--muted);">Keep your streak alive!</div></div><button class="btn btn-gold" style="margin-left:auto;padding:8px 16px;font-size:13px;" onclick="openModal(\'logModal\')">Log Now</button></div>';
+  }
+
+  // Top readers today
+  const topDiv = document.getElementById('topToday');
+  const byUser = {};
+  state.logs.filter(l=>l.date===todayStr()).forEach(l => { byUser[l.user]=(byUser[l.user]||0)+(l.pages||0); });
+  const sorted = Object.entries(byUser).sort((a,b) => b[1]-a[1]);
+  topDiv.innerHTML = sorted.length ? sorted.slice(0,5).map(([u,p],i) =>
+    '<div class="lb-row">'
+    + '<div class="lb-rank ' + (['gold','silver','bronze'][i]||'') + '">' + (['🥇','🥈','🥉'][i]||i+1) + '</div>'
+    + '<div class="lb-avatar" style="background:' + avatarColor(u) + ';color:#000;">' + initials(u) + '</div>'
+    + '<div class="lb-info"><div class="lb-name">' + sanitize(u) + '</div><div class="lb-detail">' + p + ' pages today</div></div>'
+    + '<div class="lb-pages">' + p + '</div></div>').join('')
+  : '<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">No readings today yet</div></div>';
+
+  // Weekly bar chart
+  const labels=[], data=[];
+  for (let i=6; i>=0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    labels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]);
+    data.push(me ? getMyLogs(me).filter(l=>l.date===ds).reduce((a,l)=>a+(l.pages||0),0) : 0);
+  }
+  const ctx = document.getElementById('weekChart').getContext('2d');
+  if (weekChartInst) weekChartInst.destroy();
+  weekChartInst = new Chart(ctx, {type:'bar', data:{labels, datasets:[{label:'Pages', data,
+    backgroundColor: data.map((_,i) => i===6?'#d4a843':'rgba(212,168,67,0.3)'),
+    borderRadius:6, borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#30363d'},ticks:{color:'#8b949e'}},y:{grid:{color:'#30363d'},ticks:{color:'#8b949e'},beginAtZero:true}}}});
+
+  // Juz progress bars on dashboard
+  const juzBars = document.getElementById('juzProgressBars');
+  if (juzBars) {
+    if (!me) { juzBars.innerHTML='<div class="empty"><div class="empty-text">Select a user to see progress.</div></div>'; return; }
+    const juzPct = getJuzCompletion(me);
+    const juzHtml = Object.entries(juzPct).filter(([,p])=>p>0).map(([jn,pct]) =>
+      '<div class="progress-wrap" style="margin-bottom:10px;">'
+      + '<div class="progress-label"><span>Juz ' + jn + '</span><span>' + pct + '%</span></div>'
+      + '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;' + (pct===100?'background:var(--green);':'') + '"></div></div>'
+      + '</div>').join('') || '<div style="color:var(--muted);font-size:13px;">Start logging to see Juz progress.</div>';
+    juzBars.innerHTML = juzHtml;
+  }
+}
+
+// ════════════════════════════════════════════════
+// PROGRESS PAGE
+// ════════════════════════════════════════════════
+let juzChartInst=null;
+
+function renderProgressPage() {
+  const me = state.currentUser;
+  const juzGrid  = document.getElementById('juzGrid');
+  const surahList = document.getElementById('surahProgressList');
+  const surahGrid = document.getElementById('surahCompletionGrid');
+  if (!me) {
+    if(juzGrid) juzGrid.innerHTML='<div class="empty"><div class="empty-text">Select a user first.</div></div>';
+    if(surahList) surahList.innerHTML='';
+    if(surahGrid) surahGrid.innerHTML='';
+    return;
+  }
+
+  const juzPct = getJuzCompletion(me);
+
+  // Juz grid
+  if (juzGrid) juzGrid.innerHTML = JUZ_DATA.map(j => {
+    const pct = juzPct[j.n]||0;
+    return '<div class="juz-cell ' + (pct===100?'read':pct>0?'partial':'') + '" title="Juz ' + j.n + ': ' + pct + '% complete">'
+      + '<div class="juz-num">' + j.n + '</div>'
+      + '<div class="juz-label">' + pct + '%</div>'
+      + '</div>';
+  }).join('');
+
+  // Juz bar chart
+  const juzCtxEl = document.getElementById('juzBarChart');
+  if (juzCtxEl) {
+    const juzData   = Array.from({length:30},(_,i) => juzPct[i+1]||0);
+    const juzLabels = Array.from({length:30},(_,i) => 'J'+(i+1));
+    if (juzChartInst) juzChartInst.destroy();
+    juzChartInst = new Chart(juzCtxEl.getContext('2d'), {type:'bar',
+      data:{labels:juzLabels, datasets:[{label:'Completion %', data:juzData,
+        backgroundColor: juzData.map(p => p===100?'#3fb950':p>50?'#d4a843':p>0?'rgba(212,168,67,0.5)':'rgba(212,168,67,0.15)'),
+        borderRadius:4, borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
+        scales:{x:{grid:{color:'#30363d'},ticks:{color:'#8b949e',font:{size:10}}},
+                y:{grid:{color:'#30363d'},ticks:{color:'#8b949e',callback:v=>v+'%'},beginAtZero:true,max:100}}}});
+  }
+
+  // Surah completion grid — colour by % read, using getMaxAyahRead (bidirectional)
+  if (surahGrid) {
+    surahGrid.innerHTML = SURAHS.map(s => {
+      const maxRead = getMaxAyahRead(s.n, me);
+      const pct = Math.round(maxRead / s.ayahs * 100);
+      const bg = pct===100 ? 'var(--green)' : pct>0 ? ('rgba(212,168,67,'+(0.2+pct/100*0.8)+')') : 'var(--surface3)';
+      const border = pct===100 ? 'var(--green)' : pct>0 ? 'var(--gold)' : 'var(--border)';
+      const textColor = pct>60 ? '#000' : pct>0 ? 'var(--gold2)' : 'var(--muted)';
+      return '<div title="' + s.n + '. ' + s.name + ' — ' + maxRead + '/' + s.ayahs + ' ayahs (' + pct + '%)" '
+        + 'style="background:' + bg + ';border:1px solid ' + border + ';border-radius:6px;padding:5px 3px;text-align:center;">'
+        + '<div style="font-size:11px;font-weight:700;color:' + (pct===100?'#000':'var(--text)') + ';">' + s.n + '</div>'
+        + '<div style="font-size:9px;color:' + textColor + ';">' + pct + '%</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Surah detail list
+  if (surahList) {
+    const surahData = SURAHS.map(s=>({s,maxRead:getMaxAyahRead(s.n,me)})).filter(d=>d.maxRead>0);
+    surahList.innerHTML = surahData.length
+      ? '<div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">📖 Reading Progress</div>'
+        + surahData.map(({s,maxRead}) => {
+          const pct = Math.round(maxRead/s.ayahs*100);
+          const juzStr = (SURAH_JUZ_RANGES[s.n]||[]).map(r=>'Juz '+r.juz).filter((v,i,a)=>a.indexOf(v)===i).join(', ');
+          return '<div class="progress-wrap" style="margin-bottom:14px;">'
+            + '<div class="progress-label">'
+              + '<span><strong>' + s.n + '. ' + s.name + '</strong> <span class="arabic">' + s.arabic + '</span>'
+              + ' <span style="font-size:10px;color:var(--muted);">' + juzStr + '</span></span>'
+              + '<span class="badge ' + (pct===100?'green':'') + '">' + maxRead + '/' + s.ayahs + ' · ' + pct + '%</span>'
+            + '</div>'
+            + '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;' + (pct===100?'background:var(--green);':'') + '"></div></div>'
+            + '</div>';
+        }).join('')
+      : '<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">No readings logged yet.</div></div>';
+  }
+}
+
+// ════════════════════════════════════════════════
+// LEADERBOARD
+// ════════════════════════════════════════════════
+let groupChartInst = null;
+
+function renderLeaderboard() {
+  function buildLb(containerId, filterFn) {
+    const byUser = {};
+    state.logs.filter(filterFn).forEach(l => { byUser[l.user]=(byUser[l.user]||0)+(l.pages||0); });
+    const sorted = Object.entries(byUser).sort((a,b) => b[1]-a[1]);
+    const el = document.getElementById(containerId);
+    if (!sorted.length) { el.innerHTML='<div class="empty"><div class="empty-text">No data yet.</div></div>'; return; }
+    el.innerHTML = sorted.map(([u,p],i) =>
+      '<div class="lb-row">'
+      + '<div class="lb-rank ' + (['gold','silver','bronze'][i]||'') + '">' + (['🥇','🥈','🥉'][i]||i+1) + '</div>'
+      + '<div class="lb-avatar" style="background:' + avatarColor(u) + ';color:#000;">' + initials(u) + '</div>'
+      + '<div class="lb-info">'
+        + '<div class="lb-name">' + sanitize(u) + '</div>'
+        + '<div class="lb-detail">' + getUniqueAyahs(u).toLocaleString() + ' unique ayahs · ' + getStreak(u) + ' 🔥</div>'
+      + '</div>'
+      + '<div class="lb-pages">' + p + '</div>'
+      + '</div>').join('');
+  }
+  buildLb('lbAllTime', ()=>true);
+  buildLb('lbWeek', l=>l.date>=weekAgoStr());
+
+  // Group chart
+  const labels = [];
+  for (let i=6; i>=0; i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    labels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]);
+  }
+  const allUsers = [...new Set(state.logs.map(l=>l.user))];
+  const datasets = allUsers.map(u => ({
+    label: u,
+    data: Array.from({length:7},(_,i) => {
+      const d=new Date(); d.setDate(d.getDate()-(6-i));
+      const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      return getMyLogs(u).filter(l=>l.date===ds).reduce((a,l)=>a+(l.pages||0),0);
+    }),
+    borderColor: avatarColor(u), backgroundColor: avatarColor(u)+'33',
+    borderWidth:2, tension:.4, fill:false, pointRadius:4
+  }));
+  const ctx = document.getElementById('groupChart').getContext('2d');
+  if (groupChartInst) groupChartInst.destroy();
+  groupChartInst = new Chart(ctx, {type:'line', data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b949e',boxWidth:12}}},
+      scales:{x:{grid:{color:'#30363d'},ticks:{color:'#8b949e'}},y:{grid:{color:'#30363d'},ticks:{color:'#8b949e'},beginAtZero:true}}}});
+}
+
+// ════════════════════════════════════════════════
+// RENDER ALL
+// ════════════════════════════════════════════════
+function renderAll() { renderDashboard(); renderRecentLogs(); }
+
+// ════════════════════════════════════════════════
+// FAJR REMINDER
+// ════════════════════════════════════════════════
+function loadReminderSettings() {
+  const s = JSON.parse(localStorage.getItem('qt_reminder')||'{}');
+  const tog = document.getElementById('reminderToggle');
+  const tw  = document.getElementById('reminderTimeWrap');
+  const tm  = document.getElementById('reminderTime');
+  if (!tog) return;
+  if (s.on) { tog.checked=true; if(tw)tw.style.display=''; if(tm&&s.time)tm.value=s.time; scheduleReminder(); }
+}
+function toggleReminder() {
+  const on = document.getElementById('reminderToggle').checked;
+  document.getElementById('reminderTimeWrap').style.display = on ? '' : 'none';
+  if (on) { reqNotifPerm(); scheduleReminder(); }
+  else { localStorage.removeItem('qt_reminder'); showNotify('Reminder off'); }
+}
+async function reqNotifPerm() {
+  if (!('Notification' in window)) { showNotify('Notifications not supported'); return; }
+  const p = await Notification.requestPermission();
+  if (p!=='granted') { showNotify('Please allow notifications'); document.getElementById('reminderToggle').checked=false; }
+  else showNotify('Notifications enabled ✅');
+}
+function saveReminderTime() { scheduleReminder(); showNotify('Reminder time saved!'); }
+function scheduleReminder() {
+  const time = document.getElementById('reminderTime')?.value || '05:30';
+  localStorage.setItem('qt_reminder', JSON.stringify({on:true,time}));
+  clearInterval(window._remInt);
+  window._remInt = setInterval(() => {
+    const s = JSON.parse(localStorage.getItem('qt_reminder')||'{}');
+    if (!s.on) return;
+    const now = new Date();
+    const [h,m] = s.time.split(':').map(Number);
+    if (now.getHours()===h && now.getMinutes()===m) {
+      const me = state.currentUser;
+      if (!getMyLogs(me).some(l=>l.date===todayStr()) && Notification.permission==='granted') {
+        new Notification('🌅 Quran Tracker', {body:`Time to log your reading, ${me||''}! 📖`, icon:'icon-192.png'});
+      }
+    }
+  }, 60000);
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  await initAdminHash();
+  loadState();
+  populateSelects();
+  updateHeader();
+  updateSegments();
+  updateAyahRange();
+  updateQuickSegments();
+  updateQuickAyah();
+  renderUserModal();
+  renderAll();
+  loadReminderSettings();
+
+  if (!state.currentUser) setTimeout(() => openModal('userModal'), 300);
+
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
+  });
+  document.getElementById('newUserInput').addEventListener('keydown', e => { if(e.key==='Enter') addUser(); });
+  const pwInput = document.getElementById('adminPwInput');
+  if (pwInput) pwInput.addEventListener('keydown', e => { if(e.key==='Enter') checkAdminPw(); });
+  document.getElementById('logJuzSelect').addEventListener('change', updateSegments);
+  document.getElementById('logSurahSelect').addEventListener('change', updateAyahRange);
+
+  function tryFbSync() { if(window._fbOK) fbStartSync(); else setTimeout(tryFbSync,200); }
+  tryFbSync();
+});
+
+</script>
